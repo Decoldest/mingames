@@ -4,32 +4,67 @@
  * Module dependencies.
  */
 
-var app = require('../app');
-var debug = require('debug')('backend:server');
-var http = require('http');
+var app = require("../app");
+var debug = require("debug")("backend:server");
+var http = require("http");
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
-app.set('port', port);
+var port = normalizePort(process.env.PORT || "3000");
+app.set("port", port);
 
 /**
  * Create HTTP server.
  */
-
 var server = http.createServer(app);
-const { Server } = require('socket.io');
-const io = new Server(server);
 
 /**
- * Test socket connection
+ * Create socket connection.
  */
-io.on('connection', (socket) => {
-  console.log('a user connected');
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
+const io = require("socket.io")(server, {
+  cors: {
+    origin: ["http://localhost:5173"],
+  },
+});
+
+/**
+ * NanoID for unique rooms
+ */
+const rooms = {};
+const customID = require("custom-id");
+function generateRoomID() {
+  return customID({});
+}
+
+/**
+ * Socket connection
+ */
+io.on("connection", (socket) => {
+  console.log("A user connected");
+
+  socket.on("create-room", (username) => {
+    const roomID = generateRoomID();
+    rooms[roomID] = { players: [{ id: socket.id, username }] };
+    socket.join(roomID);
+    io.to(roomID).emit("room-created", roomID, username);
+    console.log(rooms);
+  });
+
+  socket.on("join-room", (roomID, username) => {
+    if (rooms[roomID]) {
+      rooms[roomID].players.push({ id: socket.id, username });
+      socket.join(roomID);
+      io.to(roomID).emit("joined-room", roomID, username);
+      console.log(rooms);
+    } else {
+      socket.emit("error", "Room not found");
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log("A user disconnected");
   });
 });
 /**
@@ -37,8 +72,8 @@ io.on('connection', (socket) => {
  */
 
 server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
+server.on("error", onError);
+server.on("listening", onListening);
 
 /**
  * Normalize a port into a number, string, or false.
@@ -65,22 +100,20 @@ function normalizePort(val) {
  */
 
 function onError(error) {
-  if (error.syscall !== 'listen') {
+  if (error.syscall !== "listen") {
     throw error;
   }
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+  var bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
-    case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
+    case "EACCES":
+      console.error(bind + " requires elevated privileges");
       process.exit(1);
       break;
-    case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
+    case "EADDRINUSE":
+      console.error(bind + " is already in use");
       process.exit(1);
       break;
     default:
@@ -94,8 +127,6 @@ function onError(error) {
 
 function onListening() {
   var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+  var bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
+  debug("Listening on " + bind);
 }
