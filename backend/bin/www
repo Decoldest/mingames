@@ -30,7 +30,7 @@ const io = require("socket.io")(server, {
 });
 
 /**
- * NanoID for unique rooms
+ * custom id for unique rooms
  */
 const rooms = {};
 const customID = require("custom-id");
@@ -44,29 +44,46 @@ function generateRoomID() {
 io.on("connection", (socket) => {
   console.log("A user connected");
 
+  //Create room and push to object
   socket.on("create-room", (username) => {
     const roomID = generateRoomID();
-    rooms[roomID] = { players: [{ id: socket.id, username }] };
+    rooms[roomID] = [{ id: socket.id, username }];
     socket.join(roomID);
     io.to(roomID).emit("room-created", roomID, username);
     console.log(rooms);
   });
 
+  //Push user to rooms object
   socket.on("join-room", (roomID, username) => {
     if (rooms[roomID]) {
-      rooms[roomID].players.push({ id: socket.id, username });
+      rooms[roomID].push({ id: socket.id, username });
       socket.join(roomID);
-      io.to(roomID).emit("joined-room", roomID, username);
+      io.to(roomID).emit("joined-room", username);
       console.log(rooms);
     } else {
       socket.emit("error", "Room not found");
     }
   });
 
+  socket.on("send-message", (message, username, roomID) => {
+    io.to(roomID).emit("receive-message", message, username);
+  });
+
+  // Iterate through rooms to find and remove the disconnected user
   socket.on("disconnect", () => {
-    console.log("A user disconnected");
+    for (const roomID in rooms) {
+      const users = rooms[roomID];
+      const index = users.findIndex((user) => user.id === socket.id);
+      if (index !== -1) {
+        const disconnectedUser = users.splice(index, 1)[0];
+        io.to(roomID).emit("left-room", disconnectedUser.username);
+        console.log(rooms);
+        break;
+      }
+    }
   });
 });
+
 /**
  * Listen on provided port, on all network interfaces.
  */
