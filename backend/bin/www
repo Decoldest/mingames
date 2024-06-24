@@ -126,6 +126,11 @@ io.on("connection", (socket) => {
 
         // Join socket room
         socket.join(roomID);
+
+        //Change frontend state to waiting room
+        io.to(roomID).emit("joining-room");
+
+        //Send message to waiting room
         io.to(roomID).emit("joined-room", username);
         console.log(`Player ${username} joined room ${roomID}`);
       } else {
@@ -141,10 +146,15 @@ io.on("connection", (socket) => {
     io.to(roomID).emit("receive-message", message, username);
   });
 
+  socket.on("initiate-game", (roomID) => {
+    console.log(`Room ${roomID} started playing`);
+    io.to(roomID).emit("start-game");
+  });
+
   // Find room player is disconnecting from and remove player
   socket.on("disconnect", async () => {
     try {
-      const disconnectedPlayer = await Player.findOneAndDelete({
+      const disconnectedPlayer = await Player.findOne({
         socketID: socket.id,
       });
 
@@ -154,9 +164,7 @@ io.on("connection", (socket) => {
 
       const room = await Room.findOne({ players: disconnectedPlayer._id });
 
-      if (!room) {
-        return;
-      }
+      await Player.findByIdAndDelete(disconnectedPlayer._id);
 
       const updatedRoom = await Room.findByIdAndUpdate(
         room._id,
@@ -165,6 +173,8 @@ io.on("connection", (socket) => {
         },
         { new: true },
       );
+
+      io.to(room.code).emit("left-room", disconnectedPlayer.username);
 
       //Delete room if no players
       if (updatedRoom.players.length === 0) {
