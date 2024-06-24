@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import io from "socket.io-client";
 import WaitingRoom from "./WaitingRoom";
 
@@ -8,99 +8,114 @@ export default function Homepage() {
   const [roomID, setRoomID] = useState("");
   const [username, setUsername] = useState("");
   const [waiting, setWaiting] = useState(false);
-  const messageContainerRef = useRef(null);
+  const [playing, setIsPlaying] = useState(false);
+  const [isPartyLeader, setIsPartyLeader] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const addMessage = (message) => {
-      const messageItem = document.createElement("li");
-      messageItem.textContent = message;
-      messageContainerRef.current.appendChild(messageItem);
-    };
-
-    // Set up socket listeners
-    socket.on("connect", () => {
+    // Event handlers for socket events
+    const handleConnect = () => {
       console.log("Connected to server");
-    });
-
-    socket.on("room-created", (roomID, username) => {
-      addMessage(`${username} joined`);
-      setRoomID(roomID);
-    });
-
-    socket.on("joined-room", (username) => {
-      addMessage(`${username} joined`);
-    });
-
-    socket.on("left-room", (username) => {
-      console.log(username);
-      addMessage(`${username} left`);
-    });
-
-    socket.on("error", (message) => {
-      alert(message);
-    });
-
-    socket.on("disconnect", () => {
-      console.log("Disconnected from server");
-    });
-
-    // Cleanup on unmount
-    return () => {
-      socket.off("connect");
-      socket.off("room-created");
-      socket.off("joined-room");
-      socket.off("left-room");
-      socket.off("error");
-      socket.off("disconnect");
     };
-  }, []); // No dependencies needed for useEffect
+
+    const handleError = (errorMessage) => {
+      setError(errorMessage);
+    };
+
+    const handleDisconnect = () => {
+      console.log("Disconnected from server");
+    };
+
+    const handleStartGame = () => {
+      setWaiting(false);
+      setIsPlaying(true);
+    };
+
+    // Register socket event listeners
+    socket.on("connect", handleConnect);
+    socket.on("error", handleError);
+    socket.on("start-game", handleStartGame);
+    socket.on("disconnect", handleDisconnect);
+
+    // Cleanup function to remove event listeners on unmount
+    return () => {
+      socket.off("connect", handleConnect);
+      socket.off("error", handleError);
+      socket.off("disconnect", handleDisconnect);
+    };
+  }, []);
+
+  const handleCreateRoom = () => {
+    if (username === "") {
+      setError("Please enter a username");
+      return;
+    }
+    createRoom();
+    setIsPartyLeader(true);
+    setWaiting(true);
+  };
 
   const createRoom = () => {
     socket.emit("create-room", username);
   };
 
+  const handleJoinRoom = () => {
+    if (username === "") {
+      setError("Please enter a username");
+      return;
+    }
+    joinRoom();
+  };
+
   const joinRoom = () => {
     socket.emit("join-room", roomID, username);
+
+    socket.on("joining-room", () => {
+      setError(null);
+      setWaiting(true);
+    });
   };
 
   return (
     <main className="App">
       {waiting ? (
-        <WaitingRoom roomID={roomID} />
+        <WaitingRoom
+          socket={socket}
+          roomID={roomID}
+          username={username}
+          setRoomID={setRoomID}
+          setWaiting={setWaiting}
+          isPartyLeader={isPartyLeader}
+        />
+      ) : playing ? (
+        <section>Playing</section>
       ) : (
         <section>
           <h1>MiniGames.io</h1>
           <input
             type="text"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => {
+              setUsername(e.target.value);
+              setError(null);
+            }}
             placeholder="Enter your name"
           />
-          <button
-            onClick={() => {
-              createRoom();
-              setWaiting(true);
-            }}
-          >
-            Create Room
-          </button>
+          <button onClick={handleCreateRoom}>Create Room</button>
           <input
             type="text"
             value={roomID}
-            onChange={(e) => setRoomID(e.target.value)}
+            onChange={(e) => {
+              setRoomID(e.target.value);
+              setError(null);
+            }}
             placeholder="Enter Room ID"
           />
-          <button
-            onClick={() => {
-              joinRoom();
-              setWaiting(true);
-            }}
-          >
-            Join Room
-          </button>
+          <button onClick={handleJoinRoom}>Join Room</button>
         </section>
       )}
-      <div ref={messageContainerRef} id="messages"></div>
+
+      {error && <div className="error">{error}</div>}
     </main>
   );
 }
