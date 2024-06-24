@@ -7,6 +7,7 @@
 var app = require("../app");
 var debug = require("debug")("backend:server");
 var http = require("http");
+require("dotenv").config();
 
 /**
  * Get port from environment and store in Express.
@@ -21,6 +22,23 @@ app.set("port", port);
 var server = http.createServer(app);
 
 /**
+ * Connect to database
+ */
+const mongoose = require("mongoose");
+const mongoDB = process.env.MONGO_URL;
+const Player = require("../models/player");
+const Room = require("../models/room");
+
+mongoose
+  .connect(mongoDB)
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((e) => {
+    console.log(e);
+  });
+
+/**
  * Create socket connection.
  */
 const io = require("socket.io")(server, {
@@ -32,7 +50,6 @@ const io = require("socket.io")(server, {
 /**
  * custom id for unique rooms
  */
-const rooms = {};
 const customID = require("custom-id");
 function generateRoomID() {
   return customID({});
@@ -44,24 +61,79 @@ function generateRoomID() {
 io.on("connection", (socket) => {
   console.log("A user connected");
 
-  //Create room and push to object
-  socket.on("create-room", (username) => {
-    const roomID = generateRoomID();
-    rooms[roomID] = [{ id: socket.id, username }];
-    socket.join(roomID);
-    io.to(roomID).emit("room-created", roomID, username);
-    console.log(rooms);
+  //Create room in DB and join on socket
+  socket.on("create-room", async (username) => {
+    try {
+      const roomID = generateRoomID();
+      const player = new Player({
+        username: username,
+        socketID: socket.id,
+        isPartyLeader: true,
+      });
+      await player.save();
+
+      const room = new Room({
+        code: roomID,
+        players: [player._id],
+        isJoin: true,
+        wagers: {},
+        votes: {},
+      });
+      await room.save();
+
+      //Join socket room
+      socket.join(roomID);
+      io.to(roomID).emit("room-created", roomID, username);
+      console.log(`Room ${roomID} created with player ${username}`);
+    } catch (err) {
+      console.error("Error creating room: ", err);
+    }
   });
 
-  //Push user to rooms object
-  socket.on("join-room", (roomID, username) => {
-    if (rooms[roomID]) {
-      rooms[roomID].push({ id: socket.id, username });
-      socket.join(roomID);
-      io.to(roomID).emit("joined-room", username);
-      console.log(rooms);
-    } else {
-      socket.emit("error", "Room not found");
+  //Join room in DB and socket if it exists
+  socket.on("join-room", async (roomID, username) => {
+    try {
+      const room = await Room.findOne({ code: roomID });
+
+      // Room is available to join
+      if (room && room.isJoin) {
+        // Check if username already exists in the room
+        const existingPlayer = await Player.findOne({
+          _id: { $in: room.players },
+          username: username,
+        });
+
+        if (existingPlayer) {
+          socket.emit("error", "Username already taken in this room");
+          return;
+        }
+
+        const player = new Player({ username, socketID: socket.id });
+        await player.save();
+
+        const updatedRoom = await Room.findByIdAndUpdate(
+          room._id,
+          {
+            $push: { players: player._id },
+          },
+          { new: true },
+        );
+
+        if (!updatedRoom) {
+          socket.emit("error", "Room not found");
+          return;
+        }
+
+        // Join socket room
+        socket.join(roomID);
+        io.to(roomID).emit("joined-room", username);
+        console.log(`Player ${username} joined room ${roomID}`);
+      } else {
+        socket.emit("error", "Room not found or game has started");
+      }
+    } catch (error) {
+      console.error("Error joining room: ", error);
+      socket.emit("error", "An error occurred while trying to join the room");
     }
   });
 
@@ -69,17 +141,40 @@ io.on("connection", (socket) => {
     io.to(roomID).emit("receive-message", message, username);
   });
 
-  // Iterate through rooms to find and remove the disconnected user
-  socket.on("disconnect", () => {
-    for (const roomID in rooms) {
-      const users = rooms[roomID];
-      const index = users.findIndex((user) => user.id === socket.id);
-      if (index !== -1) {
-        const disconnectedUser = users.splice(index, 1)[0];
-        io.to(roomID).emit("left-room", disconnectedUser.username);
-        console.log(rooms);
-        break;
+  // Find room player is disconnecting from and remove player
+  socket.on("disconnect", async () => {
+    try {
+      const disconnectedPlayer = await Player.findOneAndDelete({
+        socketID: socket.id,
+      });
+
+      if (!disconnectedPlayer) {
+        return;
       }
+
+      const room = await Room.findOne({ players: disconnectedPlayer._id });
+
+      if (!room) {
+        return;
+      }
+
+      const updatedRoom = await Room.findByIdAndUpdate(
+        room._id,
+        {
+          $pull: { players: disconnectedPlayer._id },
+        },
+        { new: true },
+      );
+
+      //Delete room if no players
+      if (updatedRoom.players.length === 0) {
+        await Room.findByIdAndDelete(room._id);
+        console.log(
+          `Room ${room._id} deleted because there are no players left.`,
+        );
+      }
+    } catch (error) {
+      console.error("Error handling disconnect: ", error);
     }
   });
 });
