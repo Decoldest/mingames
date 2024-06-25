@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import io from "socket.io-client";
 import WaitingRoom from "./WaitingRoom";
+import GameMain from "./GameMain";
 
 const socket = io("http://localhost:3000");
 
@@ -88,7 +89,7 @@ export default function Homepage() {
           isPartyLeader={isPartyLeader}
         />
       ) : playing ? (
-        <section>Playing</section>
+        <GameMain socket={socket} roomID={roomID} isPartyLeader={isPartyLeader} />
       ) : (
         <section>
           <h1>MiniGames.io</h1>
@@ -114,7 +115,6 @@ export default function Homepage() {
           <button onClick={handleJoinRoom}>Join Room</button>
         </section>
       )}
-
       {error && <div className="error">{error}</div>}
     </main>
   );

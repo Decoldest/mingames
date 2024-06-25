@@ -1,5 +1,3 @@
 export default function Trivia() {
-  return (
-    
-  )
+  return <div>Trivia</div>;
 }

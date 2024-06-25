@@ -63,7 +63,6 @@ export default function WaitingRoom({
   };
 
   const setGameStart = () => {
-    console.log("statring attempt")
     socket.emit("initiate-game", roomID);
   };
 
