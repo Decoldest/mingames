@@ -2,22 +2,24 @@ import { useState, useEffect } from "react";
 import Wager from "./Wager";
 import PropTypes from "prop-types";
 import Trivia from "./games/Trivia";
+import { socket } from "../socket";
 
 GameMain.propTypes = {
-  socket: PropTypes.object,
   roomID: PropTypes.string,
   isPartyLeader: PropTypes.bool,
 };
 
-export default function GameMain({ socket, roomID, isPartyLeader }) {
+export default function GameMain({ roomID, isPartyLeader }) {
   const [isWagering, setIsWagering] = useState(false);
   const [selectedGame, setSelectedGame] = useState(null);
+  const [gameData, setGameData] = useState();
+
   // const [isVoting, setIsVoting] = useState(false);
 
   const games = {
     Trivia: {
       component: Trivia,
-      description: `Answer the trivia question correctly and you will get to hand out the amount of drinks you wager.
+      description: `Answer the trivia question correctly and you will get to hand out the amount of drinks you wager to other players.
       If you guess incorrectly, you have to drink your wager. Players who answered correctly can also hand out drinks to you.`,
     },
     // CoinToss: {
@@ -55,16 +57,22 @@ export default function GameMain({ socket, roomID, isPartyLeader }) {
       setSelectedGame(game);
     };
 
+    const handleGameData = (data) => {
+      setGameData(data);
+    };
+    
+    socket.on("game-data", handleGameData);
     socket.on("start-wagering", handleStartWagers);
     socket.on("set-game-selection", handleRoomGameSelected);
     socket.on("all-wagers-placed", startMiniGame);
 
     return () => {
+      socket.off("game-data", handleGameData);
       socket.off("start-wagering", handleStartWagers);
       socket.off("set-game-selection", handleRoomGameSelected);
       socket.off("all-wagers-placed", startMiniGame);
     };
-  }, [socket]);
+  }, []);
 
   const setWageringPhase = () => {
     if (isPartyLeader) {
@@ -93,7 +101,7 @@ export default function GameMain({ socket, roomID, isPartyLeader }) {
           <Wager socket={socket} roomID={roomID} />
         </div>
       ) : selectedGame ? (
-        SelectedGameComponent && <SelectedGameComponent />
+        SelectedGameComponent && <SelectedGameComponent gameData={gameData} />
       ) : (
         <div>
           {Object.keys(games).map((game) => (

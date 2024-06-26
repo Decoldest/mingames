@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
+import { socket } from "../socket";
 
 Wager.propTypes = {
-  socket: PropTypes.object,
   roomID: PropTypes.string,
   isPartyLeader: PropTypes.bool,
 };
 
-export default function Wager({ socket, roomID }) {
+export default function Wager({ roomID }) {
   const [wager, setWager] = useState(0);
   const [warning, setWarning] = useState(null);
   const [doneWagering, setDoneWagering] = useState(false);
@@ -30,7 +30,7 @@ export default function Wager({ socket, roomID }) {
     return () => {
       socket.off("warning", handleWarning);
     };
-  }, [socket, warning]);
+  }, [warning]);
 
   const handleWager = () => {
     if (wager === null || isNaN(wager) || wager <= 0) {

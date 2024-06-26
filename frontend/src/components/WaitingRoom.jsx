@@ -1,8 +1,8 @@
 import PropTypes from "prop-types";
 import { useState, useRef, useEffect } from "react";
+import { socket } from "../socket";
 
 WaitingRoom.propTypes = {
-  socket: PropTypes.object,
   roomID: PropTypes.string,
   username: PropTypes.string,
   setRoomID: PropTypes.func,
@@ -10,7 +10,6 @@ WaitingRoom.propTypes = {
 };
 
 export default function WaitingRoom({
-  socket,
   roomID,
   username,
   setRoomID,
@@ -53,7 +52,7 @@ export default function WaitingRoom({
       socket.off("left-room", handleLeftRoom);
       socket.off("receive-message", handleReceiveMessage);
     };
-  }, [setRoomID, socket]);
+  }, [setRoomID]);
 
   const sendMessage = () => {
     if (messageInput.trim() !== "") {

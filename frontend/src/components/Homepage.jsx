@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
-import io from "socket.io-client";
 import WaitingRoom from "./WaitingRoom";
 import GameMain from "./GameMain";
-
-const socket = io("http://localhost:3000");
+import { socket } from "../socket";
 
 export default function Homepage() {
   const [roomID, setRoomID] = useState("");
@@ -81,7 +79,6 @@ export default function Homepage() {
     <main className="App">
       {waiting ? (
         <WaitingRoom
-          socket={socket}
           roomID={roomID}
           username={username}
           setRoomID={setRoomID}
@@ -89,7 +86,11 @@ export default function Homepage() {
           isPartyLeader={isPartyLeader}
         />
       ) : playing ? (
-        <GameMain socket={socket} roomID={roomID} isPartyLeader={isPartyLeader} />
+        <GameMain
+          socket={socket}
+          roomID={roomID}
+          isPartyLeader={isPartyLeader}
+        />
       ) : (
         <section>
           <h1>MiniGames.io</h1>
