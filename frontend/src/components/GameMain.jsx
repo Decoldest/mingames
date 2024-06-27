@@ -60,7 +60,7 @@ export default function GameMain({ roomID, isPartyLeader }) {
     const handleGameData = (data) => {
       setGameData(data);
     };
-    
+
     socket.on("game-data", handleGameData);
     socket.on("start-wagering", handleStartWagers);
     socket.on("set-game-selection", handleRoomGameSelected);
@@ -101,7 +101,7 @@ export default function GameMain({ roomID, isPartyLeader }) {
           <Wager socket={socket} roomID={roomID} />
         </div>
       ) : selectedGame ? (
-        SelectedGameComponent && <SelectedGameComponent gameData={gameData} />
+        SelectedGameComponent && <SelectedGameComponent gameData={gameData} roomID={roomID} />
       ) : (
         <div>
           {Object.keys(games).map((game) => (

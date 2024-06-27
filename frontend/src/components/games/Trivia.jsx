@@ -1,29 +1,63 @@
-import { socket } from "../../socket";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
+import he from "he";
+import { socket } from "../../socket";
 
 Trivia.propTypes = {
   gameData: PropTypes.object,
-  round: PropTypes.number,
 };
-export default function Trivia({ gameData }) {
-  const [choices, setChoices] = useState([]);
+
+export default function Trivia({ gameData, roomID }) {
+  const [triviaData, setTriviaData] = useState(null);
+  const [round, setRound] = useState(0);
+
   useEffect(() => {
-    const { triviaData } = gameData;
-    const { correct_answer } =
-      triviaData[gameData.round].correct_answer;
-    const { incorrect_answers } =
-      triviaData[gameData.round].incorrect_answers;
-
-    console.log(correct_answer);
-    console.log([correct_answer]+incorrect_answers);
-    setChoices(triviaData);
-
-    console.log(triviaData);
+    if (gameData) {
+      const { triviaData, round } = gameData;
+      setTriviaData(triviaData);
+      setRound(round);
+    }
   }, [gameData]);
-  return <div>Round {gameData.round}/5</div>;
+
+  if (!triviaData || round === null) return <div>Loading...</div>;
+
+  const currentQuestion = triviaData[round];
+  const { correct_answer, incorrect_answers } = currentQuestion;
+  const currentAnswers = shuffleAnswers(
+    incorrect_answers.concat(correct_answer),
+  );
+
+  console.log(currentQuestion);
+
+  const sendQuestionChoice = (correctAnswer, choice) => {
+    socket.emit(roomID, correctAnswer, choice);
+    console.log(correctAnswer, choice);
+  };
+
+  return (
+    <div>
+      <h2>Round: {round + 1}</h2>
+      {/* Decode html before displaying */}
+      <h3>{he.decode(currentQuestion.question)}</h3>
+      <div>
+        {currentAnswers.map((answer, index) => (
+          <button
+            key={index}
+            onClick={() => sendQuestionChoice(correct_answer, answer)}
+          >
+            {he.decode(answer)}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 }
 
-function getSingleQuestionAndShuffle(arr1, arr2) {
-  return arr1 + arr2;
-}
+//Shuffle answers so the orders are random, otherwise the correct answer would have constant position
+const shuffleAnswers = (answers) => {
+  for (let i = answers.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [answers[i], answers[j]] = [answers[j], answers[i]];
+  }
+  return answers;
+};
