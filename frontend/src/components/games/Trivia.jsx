@@ -5,6 +5,7 @@ import { socket } from "../../socket";
 
 Trivia.propTypes = {
   gameData: PropTypes.object,
+  roomID: PropTypes.string,
 };
 
 export default function Trivia({ gameData, roomID }) {

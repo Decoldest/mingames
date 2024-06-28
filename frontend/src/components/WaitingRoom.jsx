@@ -1,20 +1,16 @@
 import PropTypes from "prop-types";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
+import { useParams } from "react-router-dom";
+import UserContext from "./UserContext";
 import { socket } from "../socket";
 
 WaitingRoom.propTypes = {
-  roomID: PropTypes.string,
-  username: PropTypes.string,
-  setRoomID: PropTypes.func,
   isPartyLeader: PropTypes.bool,
 };
 
-export default function WaitingRoom({
-  roomID,
-  username,
-  setRoomID,
-  isPartyLeader,
-}) {
+export default function WaitingRoom({ isPartyLeader }) {
+  const { roomID } = useParams();
+  const { username } = useContext(UserContext);
   const [messageInput, setMessageInput] = useState("");
   const [messages, setMessages] = useState([]);
   const messageContainerRef = useRef(null);
@@ -22,11 +18,6 @@ export default function WaitingRoom({
   useEffect(() => {
     const addMessage = (message) => {
       setMessages((prevMessages) => [...prevMessages, message]);
-    };
-
-    const handleRoomCreated = (roomID, username) => {
-      addMessage(`${username} joined`);
-      setRoomID(roomID);
     };
 
     const handleJoinedRoom = (username) => {
@@ -41,18 +32,16 @@ export default function WaitingRoom({
       addMessage(`${username}: ${message}`);
     };
 
-    socket.on("room-created", handleRoomCreated);
     socket.on("joined-room", handleJoinedRoom);
     socket.on("left-room", handleLeftRoom);
     socket.on("receive-message", handleReceiveMessage);
 
     return () => {
-      socket.off("room-created", handleRoomCreated);
       socket.off("joined-room", handleJoinedRoom);
       socket.off("left-room", handleLeftRoom);
       socket.off("receive-message", handleReceiveMessage);
     };
-  }, [setRoomID]);
+  }, []);
 
   const sendMessage = () => {
     if (messageInput.trim() !== "") {

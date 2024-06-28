@@ -1,14 +1,19 @@
 import { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import Join from "./Join";
+import { useParams, useLocation } from "react-router-dom";
 import UserContext from "./UserContext";
+import WaitingRoom from "./WaitingRoom";
+import GameMain from "./GameMain";
+import Join from "./Join";
 import { socket } from "../socket";
 
-export default function Homepage() {
-  const [roomID, setRoomID] = useState("");
+export default function Room() {
+  const { roomID } = useParams();
+  const location = useLocation();
   const { username, setUsername } = useContext(UserContext);
+  const [waiting, setWaiting] = useState(location.state || false);
+  const [playing, setIsPlaying] = useState(false);
+  const { isPartyLeader } = location.state || false;
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     // Event handlers for socket events
@@ -24,39 +29,25 @@ export default function Homepage() {
       console.log("Disconnected from server");
     };
 
+    const handleStartGame = () => {
+      setWaiting(false);
+      setIsPlaying(true);
+    };
+
     // Register socket event listeners
     socket.on("connect", handleConnect);
     socket.on("error", handleError);
+    socket.on("start-game", handleStartGame);
     socket.on("disconnect", handleDisconnect);
 
     // Cleanup function to remove event listeners on unmount
     return () => {
       socket.off("connect", handleConnect);
       socket.off("error", handleError);
+      socket.on("start-game", handleStartGame);
       socket.off("disconnect", handleDisconnect);
     };
   }, []);
-
-  const handleCreateRoom = () => {
-    if (username === "") {
-      setError("Please enter a username");
-      return;
-    }
-    createRoom();
-  };
-
-  const createRoom = () => {
-    socket.emit("create-room", username, (response) => {
-      if (response.success) {
-        setRoomID(response.roomID);
-        navigate(`/${response.roomID}`, {
-          state: { isPartyLeader: true, waiting: true },
-        });
-      } else {
-        setError(response.message);
-      }
-    });
-  };
 
   const handleJoinRoom = () => {
     if (username === "") {
@@ -71,23 +62,26 @@ export default function Homepage() {
 
     socket.on("joining-room", () => {
       setError(null);
-      navigate(`/${roomID}`, { state: { isPartyLeader: false, waiting: true } });
+      setWaiting(true);
     });
   };
 
   return (
     <main>
-      <Join
-        creatingRoom={true}
-        handleCreateRoom={handleCreateRoom}
-        handleJoinRoom={handleJoinRoom}
-        error={error}
-        setError={setError}
-        username={username}
-        setUsername={setUsername}
-        roomID={roomID}
-        setRoomID={setRoomID}
-      />
+      {waiting ? (
+        <WaitingRoom username={username} isPartyLeader={isPartyLeader} />
+      ) : playing ? (
+        <GameMain isPartyLeader={isPartyLeader} />
+      ) : (
+        <Join
+          creatingRoom={false}
+          handleJoinRoom={handleJoinRoom}
+          error={error}
+          setError={setError}
+          username={username}
+          setUsername={setUsername}
+        />
+      )}
     </main>
   );
 }

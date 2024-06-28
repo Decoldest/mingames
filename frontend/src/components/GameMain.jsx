@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import Wager from "./Wager";
 import PropTypes from "prop-types";
 import Trivia from "./games/Trivia";
 import { socket } from "../socket";
 
 GameMain.propTypes = {
-  roomID: PropTypes.string,
   isPartyLeader: PropTypes.bool,
 };
 
-export default function GameMain({ roomID, isPartyLeader }) {
+export default function GameMain({ isPartyLeader }) {
+  const { roomID } = useParams();
   const [isWagering, setIsWagering] = useState(false);
   const [selectedGame, setSelectedGame] = useState(null);
   const [gameData, setGameData] = useState();
@@ -98,10 +99,12 @@ export default function GameMain({ roomID, isPartyLeader }) {
         <div>
           <h1>{selectedGame}</h1>
           <p>{selectedGameDescription}</p>
-          <Wager socket={socket} roomID={roomID} />
+          <Wager roomID={roomID} />
         </div>
       ) : selectedGame ? (
-        SelectedGameComponent && <SelectedGameComponent gameData={gameData} roomID={roomID} />
+        SelectedGameComponent && (
+          <SelectedGameComponent gameData={gameData} roomID={roomID} />
+        )
       ) : (
         <div>
           {Object.keys(games).map((game) => (
