@@ -55,6 +55,11 @@ function generateRoomID() {
   return customID({});
 }
 
+const {
+  sendTriviaQuestions,
+  handleTriviaAnswers,
+} = require("../utils/triviaSocket");
+
 /**
  * Socket connection
  */
@@ -62,7 +67,7 @@ io.on("connection", (socket) => {
   console.log("A user connected");
 
   //Create room in DB and join on socket
-  socket.on("create-room", async (username) => {
+  socket.on("create-room", async (username, callback) => {
     try {
       const roomID = generateRoomID();
       const player = new Player({
@@ -78,12 +83,19 @@ io.on("connection", (socket) => {
         isJoin: true,
         wagers: {},
         votes: {},
+        state: {
+          waiting: true,
+          playing: false,
+          isWagering: false,
+          selectedGame: null,
+        },
       });
       await room.save();
 
-      //Join socket room
+      //Join socket room and send message
       socket.join(roomID);
-      io.to(roomID).emit("room-created", roomID, username);
+      callback({ success: true, roomID });
+      io.to(roomID).emit("joined-room", username);
       console.log(`Room ${roomID} created with player ${username}`);
     } catch (err) {
       console.error("Error creating room: ", err);
@@ -91,12 +103,12 @@ io.on("connection", (socket) => {
   });
 
   //Join room in DB and socket if it exists
-  socket.on("join-room", async (roomID, username) => {
+  socket.on("join-room", async (roomID, username, callback) => {
     try {
       const room = await Room.findOne({ code: roomID });
 
       // Room is available to join
-      if (room && room.isJoin) {
+      if (room) {
         // Check if username already exists in the room
         const existingPlayer = await Player.findOne({
           _id: { $in: room.players },
@@ -127,8 +139,8 @@ io.on("connection", (socket) => {
         // Join socket room
         socket.join(roomID);
 
-        //Change frontend state to waiting room
-        io.to(roomID).emit("joining-room");
+        //Change frontend state to match database
+        callback({ success: true, state: updatedRoom.state });
 
         //Send message to waiting room
         io.to(roomID).emit("joined-room", username);
@@ -146,9 +158,86 @@ io.on("connection", (socket) => {
     io.to(roomID).emit("receive-message", message, username);
   });
 
-  socket.on("initiate-game", (roomID) => {
+  socket.on("initiate-game", async (roomID) => {
+    try {
+      await Room.findOneAndUpdate(
+        {
+          code: roomID,
+        },
+        { state: { waiting: false, playing: true } },
+        { new: true },
+      );
+    } catch (error) {
+      console.error("Error handling game selection: ", error);
+    }
     console.log(`Room ${roomID} started playing`);
     io.to(roomID).emit("start-game");
+  });
+
+  socket.on("initiate-wagering", (roomID) => {
+    io.to(roomID).emit("start-wagering");
+  });
+
+  socket.on("game-chosen", async (roomID, game) => {
+    //Find the current room
+    try {
+      const room = await Room.findOneAndUpdate(
+        {
+          code: roomID,
+        },
+        { state: { selectedGame: game } },
+        { new: true },
+      );
+
+      if (!room) {
+        socket.emit("warning", "Room not found");
+        return;
+      }
+
+      //Emit selection to all players in room
+      io.to(roomID).emit("set-game-selection", game);
+
+      //Fetch data or set up data for the game
+      prepareGameData(io, roomID, game);
+    } catch (error) {
+      console.error("Error handling game selection: ", error);
+    }
+  });
+
+  socket.on("place-wager", async (roomID, wager) => {
+    try {
+      const player = await Player.findOneAndUpdate(
+        {
+          socketID: socket.id,
+        },
+        { wager: wager },
+        { new: true },
+      );
+
+      if (!player) {
+        socket.emit("warning", "Player not found");
+        return;
+      }
+
+      // // Check if all players in the room have placed their wagers
+      const room = await Room.findOne({ code: roomID }).populate("players");
+
+      if (!room) {
+        socket.emit("warning", "Room not found");
+        return;
+      }
+
+      const allPlayersWagered = room.players.every(
+        (player) => player.wager > 0,
+      );
+
+      //Let all players know wagers placed
+      if (allPlayersWagered) {
+        io.to(roomID).emit("all-wagers-placed");
+      }
+    } catch (error) {
+      console.error("Error handling wager: ", error);
+    }
   });
 
   // Find room player is disconnecting from and remove player
@@ -164,6 +253,7 @@ io.on("connection", (socket) => {
 
       const room = await Room.findOne({ players: disconnectedPlayer._id });
 
+      //Delete player then remove that player from the room
       await Player.findByIdAndDelete(disconnectedPlayer._id);
 
       const updatedRoom = await Room.findByIdAndUpdate(
@@ -188,6 +278,14 @@ io.on("connection", (socket) => {
     }
   });
 });
+
+function prepareGameData(io, roomId, game) {
+  if (game === "Trivia") {
+    sendTriviaQuestions(io, roomId);
+  }
+}
+
+module.exports = { io };
 
 /**
  * Listen on provided port, on all network interfaces.

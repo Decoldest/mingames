@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-
 const roomSchema = new Schema({
   code: {
     type: String,
@@ -10,11 +9,7 @@ const roomSchema = new Schema({
     unique: true,
     trim: true,
   },
-  players: [{ type: Schema.Types.ObjectId, ref: "Player" }],
-  isJoin: {
-    type: Boolean,
-    default: true,
-  },
+  players: [{ type: Schema.Types.ObjectId, ref: "player" }],
   wagers: {
     type: Map,
     of: Number,
@@ -24,6 +19,13 @@ const roomSchema = new Schema({
     type: Map,
     of: Number,
     default: {},
+  },
+  state: {
+    waiting: { type: Boolean, default: true },
+    playing: { type: Boolean, default: false },
+    isWagering: { type: Boolean, default: false },
+    selectedGame: { type: String },
+    gameData: { type: Object },
   },
 });
 

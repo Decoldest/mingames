@@ -67,12 +67,16 @@ export default function Homepage() {
   };
 
   const joinRoom = () => {
-    socket.emit("join-room", roomID, username);
-
-    socket.on("joining-room", () => {
-      setError(null);
-      navigate(`/${roomID}`, { state: { isPartyLeader: false, waiting: true } });
+    socket.emit("join-room", roomID, username, (response) => {
+      if (response.success) {
+        navigate(`/${roomID}`, {
+          state: response.state,
+        });
+      } else {
+        setError(response.message);
+      }
     });
+    
   };
 
   return (

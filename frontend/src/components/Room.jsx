@@ -58,7 +58,14 @@ export default function Room() {
   };
 
   const joinRoom = () => {
-    socket.emit("join-room", roomID, username);
+    socket.emit("join-room", roomID, username, (response) => {
+      if (response.success) {
+        console.log(response.state);
+        setWaiting(response.state.waiting);
+      } else {
+        setError(response.message);
+      }
+    });
 
     socket.on("joining-room", () => {
       setError(null);
