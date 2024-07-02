@@ -139,11 +139,11 @@ io.on("connection", (socket) => {
         // Join socket room
         socket.join(roomID);
 
-        //Change frontend state to match database
-        callback({ success: true, state: updatedRoom.state });
+        //Change frontend state to match database and send message
+        callback({ success: true, state: updatedRoom.state }).then(
+          io.to(roomID).emit("joined-room", username),
+        );
 
-        //Send message to waiting room
-        io.to(roomID).emit("joined-room", username);
         console.log(`Player ${username} joined room ${roomID}`);
       } else {
         socket.emit("error", "Room not found or game has started");
@@ -165,16 +165,25 @@ io.on("connection", (socket) => {
           code: roomID,
         },
         { state: { waiting: false, playing: true } },
-        { new: true },
       );
     } catch (error) {
-      console.error("Error handling game selection: ", error);
+      console.error("Error handling game start: ", error);
     }
     console.log(`Room ${roomID} started playing`);
     io.to(roomID).emit("start-game");
   });
 
-  socket.on("initiate-wagering", (roomID) => {
+  socket.on("initiate-wagering", async (roomID) => {
+    try {
+      await Room.findOneAndUpdate(
+        {
+          code: roomID,
+        },
+        { state: { isWagering: true } },
+      );
+    } catch (error) {
+      console.error("Error handling wagering start: ", error);
+    }
     io.to(roomID).emit("start-wagering");
   });
 
@@ -237,6 +246,31 @@ io.on("connection", (socket) => {
       }
     } catch (error) {
       console.error("Error handling wager: ", error);
+    }
+  });
+
+  socket.on("trivia-answered", async (roomID, correctAnswer, choice) => {
+    //Update player wonBet to true or false
+    handleTriviaAnswers(correctAnswer, choice);
+
+    //Check if the every player answered, then send voting data
+    const room = await Room.findOne({ code: roomID }).populate("players");
+
+    const allPlayersAnswered = room.players.every(
+      (player) => player.wonBet !== null,
+    );
+
+    //Go through each player and add drink data
+    if (allPlayersAnswered) {
+      const drinkData = {};
+
+      room.players.forEach((player) => {
+        drinkData[player.username] = player.wonBet
+          ? player.wager
+          : -player.wager;
+      });
+
+      io.to(roomID).emit("drinks-update", drinkData);
     }
   });
 
