@@ -58,6 +58,7 @@ function generateRoomID() {
 const {
   sendTriviaQuestions,
   handleTriviaAnswers,
+  setNextTriviaQuestion,
 } = require("../utils/triviaSocket");
 
 /**
@@ -74,6 +75,7 @@ io.on("connection", (socket) => {
         username: username,
         socketID: socket.id,
         isPartyLeader: true,
+        wonBet: null,
       });
       await player.save();
 
@@ -120,7 +122,11 @@ io.on("connection", (socket) => {
           return;
         }
 
-        const player = new Player({ username, socketID: socket.id });
+        const player = new Player({
+          username,
+          socketID: socket.id,
+          wonBet: null,
+        });
         await player.save();
 
         const updatedRoom = await Room.findByIdAndUpdate(
@@ -140,9 +146,11 @@ io.on("connection", (socket) => {
         socket.join(roomID);
 
         //Change frontend state to match database and send message
-        callback({ success: true, state: updatedRoom.state }).then(
-          io.to(roomID).emit("joined-room", username),
-        );
+        callback({ success: true, state: updatedRoom.state });
+
+        process.nextTick(() => {
+          io.to(roomID).emit("joined-room", username);
+        });
 
         console.log(`Player ${username} joined room ${roomID}`);
       } else {
@@ -250,8 +258,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("trivia-answered", async (roomID, correctAnswer, choice) => {
-    //Update player wonBet to true or false
-    handleTriviaAnswers(correctAnswer, choice);
+    handleTriviaAnswers(socket, correctAnswer, choice);
 
     //Check if the every player answered, then send voting data
     const room = await Room.findOne({ code: roomID }).populate("players");
@@ -262,12 +269,19 @@ io.on("connection", (socket) => {
 
     //Go through each player and add drink data
     if (allPlayersAnswered) {
+      setNextTriviaQuestion(io, roomID);
+
       const drinkData = {};
 
       room.players.forEach((player) => {
-        drinkData[player.username] = player.wonBet
-          ? player.wager
-          : -player.wager;
+        //Check if the player has a wonBet property (player could have joined late)
+        if (player.wonBet === null) {
+          drinkData[player.username] = -1;
+        } else {
+          drinkData[player.username] = player.wonBet
+            ? player.wager
+            : -player.wager;
+        }
       });
 
       io.to(roomID).emit("drinks-update", drinkData);

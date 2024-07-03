@@ -29,7 +29,7 @@ const sendTriviaQuestions = async (io, roomID) => {
   }
 };
 
-const handleTriviaAnswers = async (correctAnswer, choice) => {
+const handleTriviaAnswers = async (socket, correctAnswer, choice) => {
   try {
     await Player.findOneAndUpdate(
       {
@@ -41,7 +41,37 @@ const handleTriviaAnswers = async (correctAnswer, choice) => {
   } catch (error) {
     console.log("Error setting trivia result: ", error);
   }
-  return choice === correctAnswer
 };
 
-module.exports = { sendTriviaQuestions, handleTriviaAnswers };
+const setNextTriviaQuestion = async (io, roomID) => {
+  try {
+    const room = await Room.findOne({ code: roomID });
+
+    if (!room) {
+      console.log("Room not found");
+      return;
+    }
+
+    const newRound = room.state.gameData.round + 1;
+
+    if (room.state.round >= 5) {
+      //End Game
+      //io.to(roomID).emit("game-over");
+      return;
+    }
+    // Update the room state
+    room.state.gameData.round = newRound;
+    await room.save();
+
+    //Emit updated round to client
+    io.to(roomID).emit("change-round", newRound);
+  } catch (error) {
+    console.log("Error changing round: ", error);
+  }
+};
+
+module.exports = {
+  sendTriviaQuestions,
+  handleTriviaAnswers,
+  setNextTriviaQuestion,
+};
