@@ -172,7 +172,7 @@ io.on("connection", (socket) => {
         {
           code: roomID,
         },
-        { state: { waiting: false, playing: true } },
+        { $set: { "state.waiting": false, "state.playing": true } },
       );
     } catch (error) {
       console.error("Error handling game start: ", error);
@@ -187,7 +187,7 @@ io.on("connection", (socket) => {
         {
           code: roomID,
         },
-        { state: { isWagering: true } },
+        { $set: { "state.isWagering": true } },
       );
     } catch (error) {
       console.error("Error handling wagering start: ", error);
@@ -202,7 +202,7 @@ io.on("connection", (socket) => {
         {
           code: roomID,
         },
-        { state: { selectedGame: game } },
+        { $set: { "state.selectedGame": game } },
         { new: true },
       );
 
@@ -273,7 +273,7 @@ io.on("connection", (socket) => {
 
       const drinkData = {};
 
-      room.players.forEach((player) => {
+      room.players.forEach(async (player) => {
         //Check if the player has a wonBet property (player could have joined late)
         if (player.wonBet === null) {
           drinkData[player.username] = -1;
@@ -281,10 +281,14 @@ io.on("connection", (socket) => {
           drinkData[player.username] = player.wonBet
             ? player.wager
             : -player.wager;
+
+          //Reset wonBet property
+          player.wonBet = null;
+          await player.save();
         }
       });
 
-      io.to(roomID).emit("drinks-update", drinkData);
+      io.to(roomID).emit("start-voting", drinkData);
     }
   });
 

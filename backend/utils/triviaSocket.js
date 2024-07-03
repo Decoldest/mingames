@@ -19,7 +19,7 @@ const sendTriviaQuestions = async (io, roomID) => {
       {
         code: roomID,
       },
-      { state: { gameData: { data, round } } },
+      { $set: { "state.gameData": { data, round } } },
     );
 
     //Send trivia data to everyone in the room
@@ -69,6 +69,8 @@ const setNextTriviaQuestion = async (io, roomID) => {
     console.log("Error changing round: ", error);
   }
 };
+
+
 
 module.exports = {
   sendTriviaQuestions,
