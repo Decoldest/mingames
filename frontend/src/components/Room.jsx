@@ -10,8 +10,8 @@ export default function Room() {
   const { roomID } = useParams();
   const location = useLocation();
   const { username, setUsername } = useContext(UserContext);
-  const [waiting, setWaiting] = useState(location.state || false);
-  const [playing, setIsPlaying] = useState(false);
+  const [waiting, setWaiting] = useState(location.state?.waiting || false);
+  const [playing, setIsPlaying] = useState(location.state?.playing || false);
   const { isPartyLeader } = location.state || false;
   const [error, setError] = useState(null);
 

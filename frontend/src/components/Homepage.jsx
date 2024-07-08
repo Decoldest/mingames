@@ -69,6 +69,7 @@ export default function Homepage() {
   const joinRoom = () => {
     socket.emit("join-room", roomID, username, (response) => {
       if (response.success) {
+        console.log(response.state);
         navigate(`/${roomID}`, {
           state: response.state,
         });

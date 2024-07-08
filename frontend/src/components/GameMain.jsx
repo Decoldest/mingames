@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import Wager from "./Wager";
 import PropTypes from "prop-types";
 import Trivia from "./games/Trivia";
+import Voting from "./Voting";
 import { socket } from "../socket";
 
 GameMain.propTypes = {
@@ -14,8 +15,7 @@ export default function GameMain({ isPartyLeader }) {
   const [isWagering, setIsWagering] = useState(false);
   const [selectedGame, setSelectedGame] = useState(null);
   const [gameData, setGameData] = useState();
-
-  // const [isVoting, setIsVoting] = useState(false);
+  const [votingData, setVotingData] = useState(null);
 
   const games = {
     Trivia: {
@@ -62,16 +62,22 @@ export default function GameMain({ isPartyLeader }) {
       setGameData(data);
     };
 
+    const handleVotingData = (data) => {
+      setVotingData(data);
+    };
+
     socket.on("game-data", handleGameData);
     socket.on("start-wagering", handleStartWagers);
     socket.on("set-game-selection", handleRoomGameSelected);
     socket.on("all-wagers-placed", startMiniGame);
+    socket.on("start-voting", handleVotingData);
 
     return () => {
       socket.off("game-data", handleGameData);
       socket.off("start-wagering", handleStartWagers);
       socket.off("set-game-selection", handleRoomGameSelected);
       socket.off("all-wagers-placed", startMiniGame);
+      socket.off("start-voting", handleVotingData);
     };
   }, []);
 
@@ -101,6 +107,8 @@ export default function GameMain({ isPartyLeader }) {
           <p>{selectedGameDescription}</p>
           <Wager roomID={roomID} />
         </div>
+      ) : votingData ? (
+        <Voting votingData={votingData} roomID={roomID} setVotingData={setVotingData} />
       ) : selectedGame ? (
         SelectedGameComponent && (
           <SelectedGameComponent gameData={gameData} roomID={roomID} />
