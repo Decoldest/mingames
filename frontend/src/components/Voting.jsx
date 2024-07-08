@@ -42,9 +42,9 @@ export default function Voting({ votingData, roomID, setVotingData }) {
 
   return (
     <section>
-      <div>
+      <div className="flex gap-4">
         {Object.entries(votingData).map(([name, drinks], i) => (
-          <div key={i}>
+          <div key={i} className="flex-column">
             <h2>{name}</h2>
             <h5>{drinks.myDrinks}</h5>
             {name !== username && votingData[username].drinksToGive > 0 && (

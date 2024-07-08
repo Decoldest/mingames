@@ -51,22 +51,26 @@ export default function Trivia({ gameData, roomID }) {
 
   return (
     <div>
-      <h2>Round: {round + 1}</h2>
-      {/* Decode html before displaying */}
-      <h3>{he.decode(currentQuestion.question)}</h3>
-      <div>
-        {currentAnswers.map((answer, index) => (
-          <button
-            key={index}
-            onClick={() => {
-              sendQuestionChoice(correct_answer, answer);
-              setWaitingMessage("Waiting for all players to answer...");
-            }}
-          >
-            {he.decode(answer)}
-          </button>
-        ))}
-      </div>
+      {!waitingMessage && (
+        <div>
+          <h2>Round: {round + 1}</h2>
+          {/* Decode html before displaying */}
+          <h3>{he.decode(currentQuestion.question)}</h3>
+          <div>
+            {currentAnswers.map((answer, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  sendQuestionChoice(correct_answer, answer);
+                }}
+              >
+                {he.decode(answer)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {waitingMessage && <h2>{waitingMessage}</h2>}
     </div>
   );
