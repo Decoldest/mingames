@@ -10,34 +10,34 @@ Voting.propTypes = {
 };
 
 export default function Voting({ votingData, roomID, setVotingData }) {
-  const [vote, setVote] = useState(0);
+  const [drinksToGive, setDrinksToGive] = useState(0);
   const [warning, setWarning] = useState(null);
-  const [doneVoting, setDoneVoting] = useState(false);
   const { username } = useContext(UserContext);
 
-  const handleIncrement = () => {
-    setVote((prevWager) => prevWager + 1);
-  };
-
-  const handleDecrement = () => {
-    setVote((prevWager) => (prevWager > 0 ? prevWager - 1 : 0));
-  };
-
   useEffect(() => {
-    console.log(votingData);
+    //Set the current user's drinks to give
+    setDrinksToGive(votingData[username].drinksToGive);
+
     const handleWarning = () => {
       setWarning(warning);
     };
 
+    const updateVotingData = (votingData) => {
+      setVotingData(votingData);
+    };
+
     socket.on("warning", handleWarning);
+    socket.on("update-voting-data", updateVotingData);
 
     return () => {
       socket.off("warning", handleWarning);
+      socket.off("update-voting-data", updateVotingData);
     };
-  }, [warning, votingData]);
+  }, [warning, votingData, username, setVotingData]);
 
-  const addDrink = (name, amount) => {
-    socket.emit("add-drink", roomID, name, amount);
+  const addDrink = (name) => {
+    //Emit drink adding - username is sender, name is receiver
+    socket.emit("add-drink", roomID, username, name);
   };
 
   return (
@@ -47,12 +47,21 @@ export default function Voting({ votingData, roomID, setVotingData }) {
           <div key={i} className="flex-column">
             <h2>{name}</h2>
             <h5>{drinks.myDrinks}</h5>
-            {name !== username && votingData[username].drinksToGive > 0 && (
-              <button onClick={() => addDrink(name, 1)}>Give Drink</button>
+            {name !== username && drinksToGive > 0 && (
+              <button
+                onClick={() => {
+                  addDrink(name);
+                }}
+              >
+                Give Drink
+              </button>
             )}
           </div>
         ))}
         {warning && <div className="warning">{warning}</div>}
+      </div>
+      <div>
+        {drinksToGive} {drinksToGive == 1 ? `Drink` : `Drinks`} To Give
       </div>
     </section>
   );
