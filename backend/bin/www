@@ -264,7 +264,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("trivia-answered", async (roomID, correctAnswer, choice) => {
-    handleTriviaAnswers(socket, correctAnswer, choice);
+    await handleTriviaAnswers(socket, correctAnswer, choice);
 
     //Check if the every player answered, then send voting data
     const room = await Room.findOne({ code: roomID }).populate("players");
@@ -275,6 +275,7 @@ io.on("connection", (socket) => {
 
     //Go through each player and add drink data
     if (allPlayersAnswered) {
+      console.log("All players have answered");
       const drinkData = {};
 
       room.players.forEach(async (player) => {
@@ -310,6 +311,7 @@ io.on("connection", (socket) => {
       });
 
       setNextTriviaQuestion(io, roomID);
+      console.log("Starting to handle voting");
       handleStartVoting(io, roomID, drinkData);
     }
   });

@@ -35,14 +35,11 @@ const giveDrink = async (io, roomID, giverName, receiverName) => {
 };
 
 const checkAllDrinksGiven = async (io, roomID, votingData) => {
-  console.log("checking all given");
   const allDrinksGiven = Object.values(votingData).every(
     (player) => player.drinksToGive === 0,
   );
-  console.log("adg - ", allDrinksGiven);
   if (allDrinksGiven) {
     io.to(roomID).emit("all-drinks-given", votingData);
-    console.log("All drinks given ", votingData);
     try {
       await setVotingData(roomID, null);
     } catch (error) {
@@ -60,6 +57,7 @@ const handleStartVoting = (io, roomID, votingData) => {
     Object.values(votingData).forEach((player) => {
       player.message = "You all got the question wrong lol";
     });
+    io.to(roomID).emit("start-voting", votingData);
     io.to(roomID).emit("all-drinks-given", votingData);
   } else {
     console.log("voting starting in room ", roomID);
