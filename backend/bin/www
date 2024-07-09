@@ -61,6 +61,11 @@ const {
   setNextTriviaQuestion,
 } = require("../utils/triviaSocket");
 
+const {
+  setVotingData,
+  giveDrink,
+  handleStartVoting,
+} = require("../utils/votingSocket");
 /**
  * Socket connection
  */
@@ -122,6 +127,7 @@ io.on("connection", (socket) => {
           return;
         }
 
+        //Create player and add to room
         const player = new Player({
           username,
           socketID: socket.id,
@@ -269,27 +275,47 @@ io.on("connection", (socket) => {
 
     //Go through each player and add drink data
     if (allPlayersAnswered) {
-      setNextTriviaQuestion(io, roomID);
-
       const drinkData = {};
 
       room.players.forEach(async (player) => {
-        //Check if the player has a wonBet property (player could have joined late)
+        // Check if the player has a wonBet property (player could have joined late)
         if (player.wonBet === null) {
-          drinkData[player.username] = -1;
+          drinkData[player.username] = {
+            drinksToGive: 0,
+            myDrinks: 0,
+            correct: false,
+            message: "You were lucky you didn't answer",
+          };
         } else {
-          drinkData[player.username] = player.wonBet
-            ? player.wager
-            : -player.wager;
+          if (player.wonBet) {
+            drinkData[player.username] = {
+              drinksToGive: Number(player.wager),
+              myDrinks: 0,
+              correct: true,
+              message: "You were Correct! LFGGGG!",
+            };
+          } else {
+            drinkData[player.username] = {
+              drinksToGive: 0,
+              myDrinks: Number(player.wager),
+              correct: false,
+              message: "You were incorrect! Get better bud!",
+            };
+          }
 
-          //Reset wonBet property
+          // Reset wonBet property
           player.wonBet = null;
           await player.save();
         }
       });
 
-      io.to(roomID).emit("start-voting", drinkData);
+      setNextTriviaQuestion(io, roomID);
+      handleStartVoting(io, roomID, drinkData);
     }
+  });
+
+  socket.on("add-drink", async (roomID, username, name) => {
+    giveDrink(io, roomID, username, name);
   });
 
   // Find room player is disconnecting from and remove player
