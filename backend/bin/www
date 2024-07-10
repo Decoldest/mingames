@@ -57,15 +57,12 @@ function generateRoomID() {
 
 const {
   sendTriviaQuestions,
-  handleTriviaAnswers,
-  setNextTriviaQuestion,
+  triviaAnswered,
 } = require("../utils/triviaSocket");
 
-const {
-  setVotingData,
-  giveDrink,
-  handleStartVoting,
-} = require("../utils/votingSocket");
+const { handleAfterVotingDone } = require("../utils/gameSocket");
+
+const { giveDrink } = require("../utils/votingSocket");
 /**
  * Socket connection
  */
@@ -160,7 +157,7 @@ io.on("connection", (socket) => {
 
         console.log(`Player ${username} joined room ${roomID}`);
       } else {
-        socket.emit("error", "Room not found or game has started");
+        socket.emit("error", "Room not found");
       }
     } catch (error) {
       console.error("Error joining room: ", error);
@@ -256,6 +253,12 @@ io.on("connection", (socket) => {
 
       //Let all players know wagers placed
       if (allPlayersWagered) {
+        await Room.findOneAndUpdate(
+          {
+            code: roomID,
+          },
+          { $set: { "state.isWagering": false } },
+        );
         io.to(roomID).emit("all-wagers-placed");
       }
     } catch (error) {
@@ -264,60 +267,16 @@ io.on("connection", (socket) => {
   });
 
   socket.on("trivia-answered", async (roomID, correctAnswer, choice) => {
-    await handleTriviaAnswers(socket, correctAnswer, choice);
-
-    //Check if the every player answered, then send voting data
-    const room = await Room.findOne({ code: roomID }).populate("players");
-
-    const allPlayersAnswered = room.players.every(
-      (player) => player.wonBet !== null,
-    );
-
-    //Go through each player and add drink data
-    if (allPlayersAnswered) {
-      console.log("All players have answered");
-      const drinkData = {};
-
-      room.players.forEach(async (player) => {
-        // Check if the player has a wonBet property (player could have joined late)
-        if (player.wonBet === null) {
-          drinkData[player.username] = {
-            drinksToGive: 0,
-            myDrinks: 0,
-            correct: false,
-            message: "You were lucky you didn't answer",
-          };
-        } else {
-          if (player.wonBet) {
-            drinkData[player.username] = {
-              drinksToGive: Number(player.wager),
-              myDrinks: 0,
-              correct: true,
-              message: "You were Correct! LFGGGG!",
-            };
-          } else {
-            drinkData[player.username] = {
-              drinksToGive: 0,
-              myDrinks: Number(player.wager),
-              correct: false,
-              message: "You were incorrect! Get better bud!",
-            };
-          }
-
-          // Reset wonBet property
-          player.wonBet = null;
-          await player.save();
-        }
-      });
-
-      setNextTriviaQuestion(io, roomID);
-      console.log("Starting to handle voting");
-      handleStartVoting(io, roomID, drinkData);
-    }
+    triviaAnswered(socket, io, roomID, correctAnswer, choice);
   });
 
+  //Change the state of votingData and sends to client
   socket.on("add-drink", async (roomID, username, name) => {
     giveDrink(io, roomID, username, name);
+  });
+
+  socket.on("done-voting-phase", async (roomID) => {
+    handleAfterVotingDone(socket, io, roomID);
   });
 
   // Find room player is disconnecting from and remove player

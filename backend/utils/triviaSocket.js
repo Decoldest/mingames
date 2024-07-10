@@ -1,6 +1,7 @@
 const { response } = require("../app");
 const Player = require("../models/player");
 const Room = require("../models/room");
+const { handleStartVoting } = require("./votingSocket");
 
 const sendTriviaQuestions = async (io, roomID) => {
   try {
@@ -19,7 +20,7 @@ const sendTriviaQuestions = async (io, roomID) => {
       {
         code: roomID,
       },
-      { $set: { "state.gameData": { data, round } } },
+      { $set: { "state.gameData": { triviaData: data, round } } },
     );
 
     //Send trivia data to everyone in the room
@@ -43,37 +44,86 @@ const handleTriviaAnswers = async (socket, correctAnswer, choice) => {
   }
 };
 
-const setNextTriviaQuestion = async (io, roomID) => {
+const setNextTriviaQuestion = async (room, continueGame) => {
   try {
-    const room = await Room.findOne({ code: roomID });
-
-    if (!room) {
-      console.log("Room not found");
-      return;
-    }
-
-    const newRound = room.state.gameData.round + 1;
-
     if (room.state.round >= 5) {
       //End Game
-      //io.to(roomID).emit("game-over");
-      return;
+      //End Game function
+      return "end";
     }
     // Update the room state
-    room.state.gameData.round = newRound;
+    room.state = {
+      ...room.state,
+      gameData: {
+        ...room.state.gameData,
+        round: room.state.gameData.round + 1,
+      },
+      votingData: null,
+      isWagering: true,
+    };
+
     await room.save();
 
-    //Emit updated round to client
-    io.to(roomID).emit("change-round", newRound);
+    //Emit updated round to client in gameSocket function
+    continueGame(room.state);
   } catch (error) {
     console.log("Error changing round: ", error);
+    throw error;
   }
 };
 
+const triviaAnswered = async (socket, io, roomID, correctAnswer, choice) => {
+  await handleTriviaAnswers(socket, correctAnswer, choice);
 
+  //Check if the every player answered, then send voting data
+  const room = await Room.findOne({ code: roomID }).populate("players");
+
+  const allPlayersAnswered = room.players.every(
+    (player) => player.wonBet !== null,
+  );
+
+  //Go through each player and add drink data
+  if (allPlayersAnswered) {
+    const drinkData = {};
+
+    room.players.forEach(async (player) => {
+      // Check if the player has a wonBet property (player could have joined late)
+      if (player.wonBet === null) {
+        drinkData[player.username] = {
+          drinksToGive: 0,
+          myDrinks: 0,
+          correct: false,
+          message: "You were lucky you didn't answer",
+        };
+      } else {
+        if (player.wonBet) {
+          drinkData[player.username] = {
+            drinksToGive: Number(player.wager),
+            myDrinks: 0,
+            correct: true,
+            message: "You were Correct! LFGGGG!",
+          };
+        } else {
+          drinkData[player.username] = {
+            drinksToGive: 0,
+            myDrinks: Number(player.wager),
+            correct: false,
+            message: "You were incorrect! Get better bud!",
+          };
+        }
+
+        // Reset wonBet property
+        player.wonBet = null;
+        await player.save();
+      }
+    });
+    handleStartVoting(io, roomID, drinkData);
+  }
+};
 
 module.exports = {
   sendTriviaQuestions,
   handleTriviaAnswers,
   setNextTriviaQuestion,
+  triviaAnswered,
 };

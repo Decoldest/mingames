@@ -15,11 +15,6 @@ const roomSchema = new Schema({
     of: Number,
     default: {},
   },
-  votes: {
-    type: Map,
-    of: Number,
-    default: {},
-  },
   state: {
     waiting: { type: Boolean, default: true },
     playing: { type: Boolean, default: false },
