@@ -7,9 +7,15 @@ Voting.propTypes = {
   votingData: PropTypes.object,
   roomID: PropTypes.string,
   setVotingData: PropTypes.func,
+  doneVotingPhase: PropTypes.func,
 };
 
-export default function Voting({ votingData, roomID, setVotingData }) {
+export default function Voting({
+  votingData,
+  roomID,
+  setVotingData,
+  doneVotingPhase,
+}) {
   const [drinksToGive, setDrinksToGive] = useState(0);
   const [warning, setWarning] = useState(null);
   const [votingResults, setVotingResults] = useState(-1);
@@ -60,6 +66,13 @@ export default function Voting({ votingData, roomID, setVotingData }) {
               ? `You got lucky this time`
               : `Please drink responsibly`}
           </h1>
+          <button
+            onClick={() => {
+              doneVotingPhase();
+            }}
+          >
+            Done Drinking
+          </button>
         </div>
       ) : (
         <>

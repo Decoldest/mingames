@@ -12,10 +12,16 @@ GameMain.propTypes = {
 
 export default function GameMain({ isPartyLeader }) {
   const { roomID } = useParams();
-  const [isWagering, setIsWagering] = useState(false);
-  const [selectedGame, setSelectedGame] = useState(null);
-  const [gameData, setGameData] = useState();
-  const [votingData, setVotingData] = useState(null);
+  const [state, setState] = useState({
+    isWagering: false,
+    selectedGame: null,
+    gameData: null,
+    votingData: null,
+    waitingMessage: "",
+  });
+
+  const { isWagering, selectedGame, gameData, votingData, waitingMessage } =
+    state;
 
   const games = {
     Trivia: {
@@ -23,47 +29,32 @@ export default function GameMain({ isPartyLeader }) {
       description: `Answer the trivia question correctly and you will get to hand out the amount of drinks you wager to other players.
       If you guess incorrectly, you have to drink your wager. Players who answered correctly can also hand out drinks to you.`,
     },
-    // CoinToss: {
-    //   component: CoinToss,
-    //   description: "A simple coin toss game.",
-    // },
-    // TortoiseRace: {
-    //   component: TortoiseRace,
-    //   description: "A race game with tortoises.",
-    // },
-    // HotPotato: {
-    //   component: HotPotato,
-    //   description: "A game where you pass a hot potato around.",
-    // },
-    // Knockout: {
-    //   component: Knockout,
-    //   description: "A knockout-style competition.",
-    // },
-    // Bingo: {
-    //   component: Bingo,
-    //   description: "A classic bingo game.",
-    // },
   };
 
   useEffect(() => {
     const handleStartWagers = () => {
-      setIsWagering(true);
+      setState((prevState) => ({ ...prevState, isWagering: true }));
     };
 
     const startMiniGame = () => {
-      setIsWagering(false);
+      setState((prevState) => ({ ...prevState, isWagering: false }));
     };
 
     const handleRoomGameSelected = (game) => {
-      setSelectedGame(game);
+      setState((prevState) => ({ ...prevState, selectedGame: game }));
     };
 
     const handleGameData = (data) => {
-      setGameData(data);
+      setState((prevState) => ({ ...prevState, gameData: data }));
     };
 
     const handleVotingData = (data) => {
-      setVotingData(data);
+      setState((prevState) => ({ ...prevState, votingData: data }));
+    };
+
+    const handleContinueGame = (state) => {
+      console.log(state);
+      setState(state);
     };
 
     socket.on("game-data", handleGameData);
@@ -71,6 +62,7 @@ export default function GameMain({ isPartyLeader }) {
     socket.on("set-game-selection", handleRoomGameSelected);
     socket.on("all-wagers-placed", startMiniGame);
     socket.on("start-voting", handleVotingData);
+    socket.on("update-game", handleContinueGame);
 
     return () => {
       socket.off("game-data", handleGameData);
@@ -78,6 +70,7 @@ export default function GameMain({ isPartyLeader }) {
       socket.off("set-game-selection", handleRoomGameSelected);
       socket.off("all-wagers-placed", startMiniGame);
       socket.off("start-voting", handleVotingData);
+      socket.off("update-game", handleContinueGame);
     };
   }, []);
 
@@ -99,6 +92,10 @@ export default function GameMain({ isPartyLeader }) {
     ? games[selectedGame]?.description
     : null;
 
+  const doneVotingPhase = () => {
+    socket.emit("done-voting-phase", roomID);
+  };
+
   return (
     <section>
       {isWagering ? (
@@ -108,10 +105,27 @@ export default function GameMain({ isPartyLeader }) {
           <Wager roomID={roomID} />
         </div>
       ) : votingData ? (
-        <Voting votingData={votingData} roomID={roomID} setVotingData={setVotingData} />
+        <Voting
+          votingData={votingData}
+          roomID={roomID}
+          setVotingData={(data) =>
+            setState((prevState) => ({ ...prevState, votingData: data }))
+          }
+          doneVotingPhase={doneVotingPhase}
+        />
       ) : selectedGame ? (
         SelectedGameComponent && (
-          <SelectedGameComponent gameData={gameData} roomID={roomID} />
+          <SelectedGameComponent
+            gameData={gameData}
+            roomID={roomID}
+            waitingMessage={waitingMessage}
+            setWaitingMessage={(message) =>
+              setState((prevState) => ({
+                ...prevState,
+                waitingMessage: message,
+              }))
+            }
+          />
         )
       ) : (
         <div>

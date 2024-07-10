@@ -6,12 +6,18 @@ import { socket } from "../../socket";
 Trivia.propTypes = {
   gameData: PropTypes.object,
   roomID: PropTypes.string,
+  waitingMessage: PropTypes.string,
+  setWaitingMessage: PropTypes.func,
 };
 
-export default function Trivia({ gameData, roomID }) {
+export default function Trivia({
+  gameData,
+  roomID,
+  waitingMessage,
+  setWaitingMessage,
+}) {
   const [triviaData, setTriviaData] = useState(null);
   const [round, setRound] = useState(null);
-  const [waitingMessage, setWaitingMessage] = useState("");
 
   useEffect(() => {
     //Set game data
