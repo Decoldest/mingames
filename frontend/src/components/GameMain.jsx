@@ -1,24 +1,20 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Wager from "./Wager";
 import PropTypes from "prop-types";
 import Trivia from "./games/Trivia";
+import Race from "./games/Race";
 import Voting from "./Voting";
 import { socket } from "../socket";
 
 GameMain.propTypes = {
   isPartyLeader: PropTypes.bool,
+  state: PropTypes.object,
+  setState: PropTypes.func,
 };
 
-export default function GameMain({ isPartyLeader }) {
+export default function GameMain({ isPartyLeader, state, setState }) {
   const { roomID } = useParams();
-  const [state, setState] = useState({
-    isWagering: false,
-    selectedGame: null,
-    gameData: null,
-    votingData: null,
-    waitingMessage: "",
-  });
 
   const { isWagering, selectedGame, gameData, votingData, waitingMessage } =
     state;
@@ -28,6 +24,11 @@ export default function GameMain({ isPartyLeader }) {
       component: Trivia,
       description: `Answer the trivia question correctly and you will get to hand out the amount of drinks you wager to other players.
       If you guess incorrectly, you have to drink your wager. Players who answered correctly can also hand out drinks to you.`,
+    },
+    Race: {
+      component: Race,
+      description: `Name your Squirtle and wager a number of drinks that they will win. Winner gets to give drinks out. Losers will
+      drink their wager plus any additional drinks given to them`,
     },
   };
 
@@ -53,8 +54,20 @@ export default function GameMain({ isPartyLeader }) {
     };
 
     const handleContinueGame = (state) => {
-      console.log(state);
       setState(state);
+    };
+
+    //Resets the screen to game selection state
+    const handleEndGame = () => {
+      setState({
+        waiting: false,
+        playing: true,
+        selectedGame: null,
+        gameData: null,
+        votingData: null,
+        isWagering: false,
+        waitingMessage: "",
+      });
     };
 
     socket.on("game-data", handleGameData);
@@ -63,6 +76,7 @@ export default function GameMain({ isPartyLeader }) {
     socket.on("all-wagers-placed", startMiniGame);
     socket.on("start-voting", handleVotingData);
     socket.on("update-game", handleContinueGame);
+    socket.on("end-game", handleEndGame);
 
     return () => {
       socket.off("game-data", handleGameData);
@@ -71,8 +85,9 @@ export default function GameMain({ isPartyLeader }) {
       socket.off("all-wagers-placed", startMiniGame);
       socket.off("start-voting", handleVotingData);
       socket.off("update-game", handleContinueGame);
+      socket.off("end-game", handleEndGame);
     };
-  }, []);
+  }, [setState]);
 
   const setWageringPhase = () => {
     if (isPartyLeader) {
@@ -101,6 +116,9 @@ export default function GameMain({ isPartyLeader }) {
       {isWagering ? (
         <div>
           <h1>{selectedGame}</h1>
+          <h3>
+            {gameData && gameData.round ? `Round: ${gameData.round + 1}` : ""}
+          </h3>
           <p>{selectedGameDescription}</p>
           <Wager roomID={roomID} />
         </div>

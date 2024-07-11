@@ -10,10 +10,19 @@ export default function Room() {
   const { roomID } = useParams();
   const location = useLocation();
   const { username, setUsername } = useContext(UserContext);
-  const [waiting, setWaiting] = useState(location.state?.waiting || false);
-  const [playing, setIsPlaying] = useState(location.state?.playing || false);
   const { isPartyLeader } = location.state || false;
   const [error, setError] = useState(null);
+  const [state, setState] = useState({
+    waiting: location.state?.waiting || false,
+    playing: location.state?.playing || false,
+    isWagering: false,
+    selectedGame: null,
+    gameData: null,
+    votingData: null,
+    waitingMessage: "",
+  });
+
+  const { waiting, playing } = state;
 
   useEffect(() => {
     // Event handlers for socket events
@@ -30,8 +39,11 @@ export default function Room() {
     };
 
     const handleStartGame = () => {
-      setWaiting(false);
-      setIsPlaying(true);
+      setState((prevState) => ({
+        ...prevState,
+        waiting: false,
+        playing: true,
+      }));
     };
 
     // Register socket event listeners
@@ -61,7 +73,7 @@ export default function Room() {
     socket.emit("join-room", roomID, username, (response) => {
       if (response.success) {
         console.log(response.state);
-        setWaiting(response.state.waiting);
+        setState(response.state);
       } else {
         setError(response.message);
       }
@@ -69,7 +81,10 @@ export default function Room() {
 
     socket.on("joining-room", () => {
       setError(null);
-      setWaiting(true);
+      setState((prevState) => ({
+        ...prevState,
+        waiting: true,
+      }));
     });
   };
 
@@ -78,7 +93,11 @@ export default function Room() {
       {waiting ? (
         <WaitingRoom username={username} isPartyLeader={isPartyLeader} />
       ) : playing ? (
-        <GameMain isPartyLeader={isPartyLeader} />
+        <GameMain
+          isPartyLeader={isPartyLeader}
+          state={state}
+          setState={setState}
+        />
       ) : (
         <Join
           creatingRoom={false}

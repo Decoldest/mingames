@@ -26,16 +26,6 @@ export default function Trivia({
       setTriviaData(triviaData.results);
       setRound(round);
     }
-
-    const changeRound = (round) => {
-      setRound(round);
-    };
-
-    socket.on("change-round", changeRound);
-
-    return () => {
-      socket.off("change-round", changeRound);
-    };
   }, [gameData]);
 
   if (!triviaData || round === null) return <div>Loading...</div>;
@@ -58,7 +48,7 @@ export default function Trivia({
   return (
     <div>
       <div>
-        <h2>Round: {round + 1}</h2>
+        <h2>Round: {round + 1} / 5</h2>
         {/* Decode html before displaying */}
         <h3>{he.decode(currentQuestion.question)}</h3>
         {!waitingMessage && (

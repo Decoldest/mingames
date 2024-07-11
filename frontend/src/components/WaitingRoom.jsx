@@ -65,8 +65,10 @@ export default function WaitingRoom({ isPartyLeader }) {
           </div>
         ))}
       </div>
-      {isPartyLeader && (
+      {isPartyLeader ? (
         <button onClick={() => setGameStart()}>Start Game</button>
+      ) : (
+        <h4>Party leader will start the game</h4>
       )}
       <div className="input-container">
         <input
