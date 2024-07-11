@@ -66,6 +66,7 @@ const { giveDrink } = require("../utils/votingSocket");
 /**
  * Socket connection
  */
+
 io.on("connection", (socket) => {
   console.log("A user connected");
 

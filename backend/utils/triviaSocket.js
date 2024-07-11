@@ -1,7 +1,8 @@
-const { response } = require("../app");
 const Player = require("../models/player");
 const Room = require("../models/room");
 const { handleStartVoting } = require("./votingSocket");
+
+const maxRound = 4;
 
 const sendTriviaQuestions = async (io, roomID) => {
   try {
@@ -44,19 +45,22 @@ const handleTriviaAnswers = async (socket, correctAnswer, choice) => {
   }
 };
 
-const setNextTriviaQuestion = async (room, continueGame) => {
+const setNextTriviaQuestion = async (room, continueGame, endGame) => {
   try {
-    if (room.state.round >= 5) {
-      //End Game
-      //End Game function
-      return "end";
+    const round = room.state.gameData.round;
+    console.log(round);
+    if (round >= maxRound) {
+      //Call end game function from gameSocket
+      console.log("Game is over");
+      endGame();
+      return;
     }
     // Update the room state
     room.state = {
       ...room.state,
       gameData: {
         ...room.state.gameData,
-        round: room.state.gameData.round + 1,
+        round: round + 1,
       },
       votingData: null,
       isWagering: true,

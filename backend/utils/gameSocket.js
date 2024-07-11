@@ -9,7 +9,22 @@ const handleAfterVotingDone = async (socket, io, roomID) => {
   };
 
   //Send updated state to end current game
-  const endGame = (socket, io, roomID) => {
+  const endGame = async () => {
+    await Room.findOneAndUpdate(
+      { code: roomID },
+      {
+        $set: {
+          "state.waiting": false,
+          "state.playing": true,
+          "state.selectedGame": null,
+          "state.gameData": null,
+          "state.votingData": null,
+          "state.isWagering": false,
+          "state.waitingMessage": "",
+        },
+      },
+    );
+
     io.to(roomID).emit("end-game");
   };
   //Reset the player's wager to 0
@@ -29,8 +44,7 @@ const handleAfterVotingDone = async (socket, io, roomID) => {
     console.log("All players are done drinking");
     switch (room.state.selectedGame) {
       case "Trivia":
-        console.log("trivia is selected");
-        await setNextTriviaQuestion(room, continueGame);
+        await setNextTriviaQuestion(room, continueGame, endGame);
         break;
     }
   }

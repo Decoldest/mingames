@@ -59,6 +59,16 @@ const handleStartVoting = (io, roomID, votingData) => {
     });
     io.to(roomID).emit("start-voting", votingData);
     io.to(roomID).emit("all-drinks-given", votingData);
+  } else if (
+    Object.values(votingData).every((player) => player.drinksToGive === 0)
+  ) {
+    Object.values(votingData).forEach((player) => {
+      if (player.correct) {
+        player.message = "You were correct but you didn't place a wager";
+      }
+    }); 
+    io.to(roomID).emit("start-voting", votingData);
+    io.to(roomID).emit("all-drinks-given", votingData);
   } else {
     console.log("voting starting in room ", roomID);
     io.to(roomID).emit("start-voting", votingData);
