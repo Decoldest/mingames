@@ -5,3 +5,9 @@
 .squirtle-sprite{
   image-rendering: pixelated;
 }
+
+.squirtle-animated{ 
+  position: relative;
+  width: 100px; 
+  height: 100px;
+}
