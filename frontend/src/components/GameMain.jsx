@@ -27,8 +27,9 @@ export default function GameMain({ isPartyLeader, state, setState }) {
     },
     Race: {
       component: Race,
-      description: `Name your Squirtle and wager a number of drinks that they will win. Winner gets to give drinks out. Losers will
-      drink their wager plus any additional drinks given to them`,
+      description: `You will get a Squirtle that will race the other Squirtles. Wager a number of drinks 
+      on your Squirtle winning the race. Winner gets to give drinks out. Losers will
+      drink their wager plus any additional drinks given to them.`,
     },
   };
 

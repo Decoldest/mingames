@@ -1,3 +1,7 @@
 
 @tailwind components;
 @tailwind utilities;
+
+.squirtle-sprite{
+  image-rendering: pixelated;
+}
