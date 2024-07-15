@@ -41,7 +41,6 @@ export default function Trivia({
   //Send answer back to server
   const sendQuestionChoice = (correctAnswer, choice) => {
     socket.emit("trivia-answered", roomID, correctAnswer, choice);
-    console.log(correctAnswer, choice);
     setWaitingMessage("");
   };
 
