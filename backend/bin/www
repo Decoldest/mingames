@@ -63,6 +63,9 @@ const {
 const { handleAfterVotingDone } = require("../utils/gameSocket");
 
 const { giveDrink } = require("../utils/votingSocket");
+
+const { addRacerSquirtle } = require("../utils/raceSocket");
+
 /**
  * Socket connection
  */
@@ -278,6 +281,10 @@ io.on("connection", (socket) => {
 
   socket.on("done-voting-phase", async (roomID) => {
     handleAfterVotingDone(socket, io, roomID);
+  });
+
+  socket.on("add-squirtle", async (squirtle, username, roomID, callback) => {
+    addRacerSquirtle(socket, io, squirtle, username, roomID, callback);
   });
 
   // Find room player is disconnecting from and remove player

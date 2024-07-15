@@ -48,7 +48,6 @@ const handleTriviaAnswers = async (socket, correctAnswer, choice) => {
 const setNextTriviaQuestion = async (room, continueGame, endGame) => {
   try {
     const round = room.state.gameData.round;
-    console.log(round);
     if (round >= maxRound) {
       //Call end game function from gameSocket
       console.log("Game is over");

@@ -21,7 +21,7 @@ const roomSchema = new Schema({
     isWagering: { type: Boolean, default: false },
     votingData: { type: Object },
     selectedGame: { type: String },
-    gameData: { type: Object },
+    gameData: { type: Object, default: null },
   },
 });
 

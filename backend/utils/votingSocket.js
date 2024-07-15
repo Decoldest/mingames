@@ -1,4 +1,3 @@
-const { response } = require("../app");
 const Player = require("../models/player");
 const Room = require("../models/room");
 
