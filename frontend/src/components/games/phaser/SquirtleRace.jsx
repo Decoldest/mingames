@@ -1,12 +1,13 @@
 import Phaser from "phaser";
 import { socket } from "../../../socket";
 import PropTypes from "prop-types";
+import Countdown from "./Countdown";
 
 class RaceMain extends Phaser.Scene {
   constructor() {
     super({ key: "RaceMain" });
     this.socket = null;
-    this.squirtles = [];
+    this.squirtles = {};
   }
 
   init(data) {
@@ -25,12 +26,11 @@ class RaceMain extends Phaser.Scene {
   create() {
     const self = this;
     this.socket = socket;
-    this.otherPlayers = [];
+    this.squirtles = this.physics.add.group();
     this.add.image(0, 0, "sky").setOrigin(0, 0);
 
     this.racers.forEach((racer) => {
-      console.log("adding ", racer);
-      this.addPlayer(self, racer);
+      addPlayer(self, racer);
     });
 
     // Define animations
@@ -46,24 +46,43 @@ class RaceMain extends Phaser.Scene {
     this.anims.create({
       key: "walk",
       frames: this.anims.generateFrameNumbers("squirtle", { start: 0, end: 1 }),
-      frameRate: 8, // Adjust frame rate to match your animation
+      frameRate: 12,
       repeat: -1,
     });
 
+    
+
     // Handle keyboard input
     this.cursors = this.input.keyboard.createCursorKeys();
+
+    function addPlayer(self, squirtleInfo) {
+      const player = self.physics.add
+        .sprite(squirtleInfo.x, squirtleInfo.y, "squirtle")
+        .setOrigin(0.5, 0.5);
+
+      player.setScale(2);
+      player.id = squirtleInfo.id;
+
+      self.squirtles.add(player);
+    }
   }
 
-  update() {}
-
-  addPlayer(self, squirtleInfo) {
-    const player = self.physics.add
-      .sprite(squirtleInfo.x, squirtleInfo.y, "squirtle")
-      .setOrigin(0.5, 0.5);
-
-    player.id = squirtleInfo.id;
-
-    this.squirtles[player.id] = player;
+  update() {
+    if (this.cursors.right.isDown) {
+      this.squirtles.getChildren().forEach((squirtle) => {
+        if (squirtle.id === this.socket.id) {
+          squirtle.setVelocityX(100);
+          squirtle.anims.play("walk", true); 
+        }
+      });
+    } else {
+      this.squirtles.getChildren().forEach((squirtle) => {
+        if (squirtle.id === this.socket.id) {
+          squirtle.setVelocityX(0);
+          squirtle.anims.play("wait", true);
+        }
+      });
+    }
   }
 
   addOtherPlayer(self, squirtleInfo) {
@@ -92,6 +111,8 @@ export default function SquirtleRace({ gameData }) {
         debug: false,
       },
     },
+    pixelArt: true,
+    antialias: false,
   };
   const game = new Phaser.Game(config);
   game.scene.add("RaceMain", RaceMain, true, gameData);

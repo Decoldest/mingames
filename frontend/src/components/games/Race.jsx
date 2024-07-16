@@ -23,7 +23,6 @@ export default function Race({
   const { username } = useContext(UserContext);
 
   useEffect(() => {
-    console.log(gameData);
     const handleAllSquirtlesIn = () => {
       setIsNamed(true);
     };
@@ -42,7 +41,7 @@ export default function Race({
 
   return (
     <section>
-      {!gameData? (
+      {!isNamed? (
         <div className="squirtle-sprite">
           <h2>Name your squirtle</h2>
           <img
