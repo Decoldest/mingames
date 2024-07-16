@@ -1,7 +1,7 @@
 const Room = require("../models/room");
 const countdownDuration = 6000;
 const countdownInterval = 1000;
-const squirtleRaceUpdateInterval = 2000;
+const squirtleRaceUpdateInterval = 5000;
 
 const addRacerSquirtle = async (
   socket,
@@ -80,6 +80,7 @@ const startCountDown = async (room, roomID, io) => {
     if (room.state.gameData.remainingTime <= 0) {
       clearInterval(intervalId);
       io.to(roomID).emit("countdown", "Go!");
+      startSquirtleRace(room.state.gameData.racers, roomID, io);
     } else {
       let timerMessage =
         room.state.gameData.remainingTime > countdownDuration - 3000
@@ -92,18 +93,29 @@ const startCountDown = async (room, roomID, io) => {
 };
 
 //Start race by emmiting starting velocities
-const startSquirtleRace = (room, roomID, io) => {
+const startSquirtleRace = (racers, roomID, io) => {
+  //Immediately send velocities
+  let velocities = generateRandVelocities(racers);
+  io.to(roomID).emit("setVelocities", velocities);
 
+  //Update velocities at set intervals
   const raceInterval = setInterval(() => {
-    let velocities = {}
+    const velocities = generateRandVelocities(racers);
 
-    io.to(roomID).emit('setVelocities', velocities)
-  }, squirtleRaceUpdateInterval)
-}
+    io.to(roomID).emit("setVelocities", velocities);
+  }, squirtleRaceUpdateInterval);
 
-const generateRandVelocities = (room) => {
-  
-}
+  setTimeout(() => {
+    clearInterval(raceInterval);
+  }, 100000);
+};
+
+const generateRandVelocities = (squirtles) => {
+  return squirtles.map((squirtle) => ({
+    id: squirtle.id,
+    velocity: Math.floor(Math.random() * 3) + 1,
+  }));
+};
 
 module.exports = {
   addRacerSquirtle,
