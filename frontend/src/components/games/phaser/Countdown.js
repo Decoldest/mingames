@@ -1,17 +1,11 @@
+import { socket } from "../../../socket";
+
 export default class Countdown {
   /** @type {Phaser.Scene} */
   scene;
 
   /** @type {Phaser.GameObjects.Text} */
   label;
-
-  /** @type {Phaser.Time.TimerEvent} */
-  timerEvent;
-
-  /** @type {() => void} */
-  finishedCallback;
-
-  duration = 0;
 
   /**
    *
@@ -21,52 +15,26 @@ export default class Countdown {
   constructor(scene, label) {
     this.scene = scene;
     this.label = label;
+
+    // Listen for countdown updates from the server
+    socket.on("countdown", (message) => {
+      this.updateCountdown(message);
+    });
   }
 
   /**
    *
-   * @param {number} duration
-   * @param {()=>void} callback
+   * @param {string | number} message
    */
+  updateCountdown(message) {
+    console.log(message);
+    this.label.setText(message.toString());
 
-  start(duration = 5000, callback) {
-    this.stop();
-
-    this.finishedCallback = callback;
-
-    this.timerEvent = this.scene.time.addEvent({
-      delay: duration,
-      callback: () => {
-        this.stop();
-
-        if (callback) {
-          callback();
-        }
-      },
-    });
-  }
-
-  stop() {
-    if (this.timerEvent) {
-      this.timerEvent.destroy();
-      this.timerEvent = undefined;
+    if (message === "Go!") {
+      // Hide the label after displaying "Go!" for 500 ms
+      this.scene.time.delayedCall(500, () => {
+        this.label.setVisible(false);
+      });
     }
-  }
-
-  update() {
-    if (!this.timerEvent || this.duration <= 0) {
-      return;
-    }
-
-    const elapsed = this.timerEvent.getElapsed();
-    const remaining = this.duration - elapsed;
-    const seconds = remaining / 1000;
-
-    this.label.text =
-      remaining > 4000
-        ? "Squirtles Ready!"
-        : remaining < 1000
-          ? "Go!"
-          : seconds.toFixed(0);
   }
 }

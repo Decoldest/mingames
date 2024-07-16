@@ -29,10 +29,6 @@ class RaceMain extends Phaser.Scene {
     this.squirtles = this.physics.add.group();
     this.add.image(0, 0, "sky").setOrigin(0, 0);
 
-    this.racers.forEach((racer) => {
-      addPlayer(self, racer);
-    });
-
     // Define animations
     this.anims.create({
       key: "wait",
@@ -50,11 +46,22 @@ class RaceMain extends Phaser.Scene {
       repeat: -1,
     });
 
-    
+    this.racers.forEach((racer) => {
+      addPlayer(self, racer);
+    });
+
+    //Call waiting animation for all squirtles
+    this.wait();
+
+    const timerLabel = this.add.text(300, 100, "", { fontSize: 40 });
+    timerLabel.setOrigin(0.5, 0.5);
+
+    this.countdown = new Countdown(this, timerLabel);
 
     // Handle keyboard input
     this.cursors = this.input.keyboard.createCursorKeys();
 
+    //Helper function to add a squirtle sprite into the game
     function addPlayer(self, squirtleInfo) {
       const player = self.physics.add
         .sprite(squirtleInfo.x, squirtleInfo.y, "squirtle")
@@ -65,33 +72,30 @@ class RaceMain extends Phaser.Scene {
 
       self.squirtles.add(player);
     }
+
+    this.socket.on("setVelocities", (velocities) => {
+      console.log(velocities);
+      this.updateVelocities(velocities);
+    });
   }
 
-  update() {
-    if (this.cursors.right.isDown) {
-      this.squirtles.getChildren().forEach((squirtle) => {
-        if (squirtle.id === this.socket.id) {
-          squirtle.setVelocityX(100);
-          squirtle.anims.play("walk", true); 
-        }
-      });
-    } else {
-      this.squirtles.getChildren().forEach((squirtle) => {
-        if (squirtle.id === this.socket.id) {
-          squirtle.setVelocityX(0);
-          squirtle.anims.play("wait", true);
-        }
-      });
-    }
+  wait() {
+    this.squirtles.getChildren().forEach((squirtle) => {
+      squirtle.anims.play("wait", true);
+    });
   }
 
-  addOtherPlayer(self, squirtleInfo) {
-    const otherPlayer = self.physics.add
-      .sprite(squirtleInfo.x, squirtleInfo.y, "squirtle")
-      .setOrigin(0.5, 0.5);
-
-    otherPlayer.playerID = squirtleInfo.id;
+  //Updates all squirtle velocities when event sent by server
+  updateVelocities(velocities) {
+    this.squirtles.getChildren().forEach((squirtle) => {
+      squirtle.setVelocityX(velocities[squirtle.id]);
+      squirtle.anims.play("walk", true);
+    });
   }
+
+  update() {}
+
+  handleCountdownFinished() {}
 }
 
 SquirtleRace.propTypes = {
