@@ -10,9 +10,10 @@ class RaceMain extends Phaser.Scene {
     this.squirtles = {};
   }
 
-  init(data, roomID) {
-    this.gameData = data;
-    this.roomID = roomID;
+  init(data) {
+    this.gameData = data.gameData;
+    this.roomID = data.roomID;
+
     this.racers = this.gameData.racers;
   }
 
@@ -116,6 +117,10 @@ class RaceMain extends Phaser.Scene {
     this.socket.on("winner", (winner, trainer) => {
       this.racing = false;
       console.log(winner, trainer);
+    });
+
+    this.socket.on("test", () => {
+      console.log("it works but not in winner");
     });
   }
 

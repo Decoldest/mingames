@@ -65,7 +65,7 @@ export default function Race({
         </div>
       ) : (
         <div className={`${window.innerWidth < 600 ? "rotate-container" : ""}`}>
-          <SquirtleRace gameData={gameData} roomID={roomID} />
+          <SquirtleRace gameData={{gameData, roomID}} />
         </div>
       )}
     </section>
