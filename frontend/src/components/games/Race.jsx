@@ -41,7 +41,7 @@ export default function Race({
 
   return (
     <section>
-      {!isNamed? (
+      {!isNamed ? (
         <div className="squirtle-sprite">
           <h2>Name your squirtle</h2>
           <img
@@ -64,9 +64,9 @@ export default function Race({
           {waitingMessage && <h2>{waitingMessage}</h2>}
         </div>
       ) : (
-        <SquirtleRace
-          gameData={gameData}
-        />
+        <div className={`${window.innerWidth < 600 ? "rotate-container" : ""}`}>
+          <SquirtleRace gameData={gameData} roomID={roomID} />
+        </div>
       )}
     </section>
   );

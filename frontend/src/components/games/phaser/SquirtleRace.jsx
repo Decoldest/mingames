@@ -10,13 +10,15 @@ class RaceMain extends Phaser.Scene {
     this.squirtles = {};
   }
 
-  init(data) {
+  init(data, roomID) {
     this.gameData = data;
+    this.roomID = roomID;
     this.racers = this.gameData.racers;
   }
 
   preload() {
     this.load.image("sky", "assets/sky.png");
+    this.load.image("map", "assets/map.jpeg");
     this.load.spritesheet("squirtle", "assets/squirtle-walking.png", {
       frameWidth: 32,
       frameHeight: 32,
@@ -26,8 +28,12 @@ class RaceMain extends Phaser.Scene {
   create() {
     const self = this;
     this.socket = socket;
+    this.gameWidth = this.sys.game.canvas.width;
+    this.gameHeight = this.sys.game.canvas.height;
+    this.racing = true;
+
     this.squirtles = this.physics.add.group();
-    this.add.image(0, 0, "sky").setOrigin(0, 0);
+    this.add.image(0, 0, "map").setOrigin(0, 0);
 
     // Define animations
     this.anims.create({
@@ -69,13 +75,42 @@ class RaceMain extends Phaser.Scene {
 
       player.setScale(2);
       player.id = squirtleInfo.id;
+      player.trainer = squirtleInfo.trainer;
+      const playerName = self.add.text(
+        squirtleInfo.x,
+        squirtleInfo.y - 5,
+        squirtleInfo.name,
+        {
+          fontSize: "16px",
+          fill: "#fff",
+        },
+      );
+      const positionX = self.add.text(
+        squirtleInfo.x,
+        squirtleInfo.y + 20,
+        `X: ${squirtleInfo.x}`,
+        {
+          fontSize: "16px",
+          fill: "#fff",
+        },
+      );
+      playerName.setOrigin(0.5, 0.5);
+      positionX.setOrigin(0.5, 0.5);
+      player.nameText = playerName;
+      player.positionXText = positionX;
 
       self.squirtles.add(player);
     }
 
     this.socket.on("setVelocities", (velocities) => {
-      console.log(velocities);
-      this.updateVelocities(velocities);
+      if (this.racing) {
+        this.updateVelocities(velocities);
+      }
+    });
+
+    this.socket.on("winner", (winner, trainer) => {
+      this.racing = false;
+      console.log(winner, trainer);
     });
   }
 
@@ -93,21 +128,37 @@ class RaceMain extends Phaser.Scene {
     });
   }
 
-  update() {}
+  update() {
+    this.squirtles.getChildren().forEach((squirtle) => {
+      squirtle.nameText.setPosition(squirtle.x, squirtle.y - 50);
+      squirtle.positionXText.setPosition(squirtle.x, squirtle.y + 20);
+      squirtle.positionXText.setText(`X: ${squirtle.x.toFixed(2)}`);
+      this.checkWonRace(squirtle, this.roomID);
+    });
+  }
 
-  handleCountdownFinished() {}
+  checkWonRace(squirtle) {
+    if (squirtle.body.x === this.gameWidth - 25) {
+      this.socket.emit("won-race", squirtle);
+    }
+  }
 }
 
 SquirtleRace.propTypes = {
   gameData: PropTypes.object,
+  roomID: PropTypes.string,
 };
 
-export default function SquirtleRace({ gameData }) {
+export default function SquirtleRace({ gameData, roomID }) {
   const config = {
     type: Phaser.AUTO,
     parent: "squirtle-race-container",
-    width: 800,
-    height: 600,
+    width: 1280,
+    height: 720,
+    scale: {
+      mode: Phaser.Scale.FIT,
+      autoCenter: Phaser.Scale.CENTER_BOTH,
+    },
     physics: {
       default: "arcade",
       arcade: {
@@ -117,9 +168,14 @@ export default function SquirtleRace({ gameData }) {
     },
     pixelArt: true,
     antialias: false,
+    fps: {
+      target: 30,
+      forceSetTimeOut: true,
+    },
+    autoFocus: false,
   };
   const game = new Phaser.Game(config);
-  game.scene.add("RaceMain", RaceMain, true, gameData);
+  game.scene.add("RaceMain", RaceMain, true, gameData, roomID);
 
   return (
     <section>

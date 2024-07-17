@@ -11,3 +11,13 @@
   width: 100px; 
   height: 100px;
 }
+
+.rotate-container {
+  transform: rotate(90deg);
+  transform-origin: center center;
+  width: 100vh; /* Swap width and height */
+  height: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

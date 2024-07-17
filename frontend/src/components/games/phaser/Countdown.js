@@ -27,7 +27,6 @@ export default class Countdown {
    * @param {string | number} message
    */
   updateCountdown(message) {
-    console.log(message);
     this.label.setText(message.toString());
 
     if (message === "Go!") {
