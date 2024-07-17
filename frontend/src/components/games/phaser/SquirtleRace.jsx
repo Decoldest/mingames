@@ -8,12 +8,12 @@ class RaceMain extends Phaser.Scene {
     super({ key: "RaceMain" });
     this.socket = null;
     this.squirtles = {};
+    this.mySquirtle = null;
   }
 
   init(data) {
     this.gameData = data.gameData;
     this.roomID = data.roomID;
-
     this.racers = this.gameData.racers;
   }
 
@@ -57,9 +57,14 @@ class RaceMain extends Phaser.Scene {
       addPlayer(self, racer);
     });
 
-    //Call waiting animation for all squirtles
+    // Call waiting animation for all squirtles
     this.squirtles.children.iterate((squirtle) => {
       squirtle.anims.play("wait");
+
+      // Save the user's squirtle for win condition checking
+      if (squirtle.id === this.socket.id) {
+        this.mySquirtle = squirtle;
+      }
     });
 
     const timerLabel = this.add.text(this.gameWidth / 2, 300, "", {
@@ -139,8 +144,8 @@ class RaceMain extends Phaser.Scene {
     if (this.racing) {
       this.squirtles.children.iterate((squirtle) => {
         squirtle.nameText.setPosition(squirtle.x, squirtle.y - 10);
-        this.checkWonRace(squirtle, this.roomID);
       });
+      this.checkWonRace(this.mySquirtle, this.roomID);
     }
   }
 

@@ -20,6 +20,7 @@ export default function Race({
 }) {
   const [isNamed, setIsNamed] = useState(false);
   const [name, setName] = useState("");
+  const [isInputDisabled, setIsInputDisabled] = useState(false);
   const { username } = useContext(UserContext);
 
   useEffect(() => {
@@ -36,6 +37,9 @@ export default function Race({
   const submitSquirtleName = () => {
     socket.emit("add-squirtle", name, username, roomID, (response) => {
       setWaitingMessage(response.message);
+      if (response.success) {
+        setIsInputDisabled(true);
+      }
     });
   };
 
@@ -58,6 +62,7 @@ export default function Race({
                 setName(e.target.value);
                 setWaitingMessage("");
               }}
+              disabled={isInputDisabled}
             />
             <button onClick={() => submitSquirtleName()}>Done</button>
           </div>
@@ -65,7 +70,7 @@ export default function Race({
         </div>
       ) : (
         <div className={`${window.innerWidth < 600 ? "rotate-container" : ""}`}>
-          <SquirtleRace data={{gameData, roomID}} />
+          <SquirtleRace data={{ gameData, roomID }} />
         </div>
       )}
     </section>
