@@ -116,29 +116,32 @@ class RaceMain extends Phaser.Scene {
 
     this.socket.on("winner", (winner, trainer) => {
       this.racing = false;
-      console.log(winner, trainer);
-    });
 
-    this.socket.on("test", () => {
-      console.log("it works but not in winner");
+      this.squirtles.children.iterate((squirtle) => {
+        squirtle.setVelocityX(0);
+        squirtle.anims.play("wait", true);
+      });
+      console.log(winner, trainer);
     });
   }
 
   //Updates all squirtle velocities when event sent by server
   updateVelocities(velocities) {
-    this.squirtles.getChildren().forEach((squirtle) => {
+    this.squirtles.children.iterate((squirtle) => {
       squirtle.setVelocityX(velocities[squirtle.id]);
       squirtle.anims.play("walk", true);
     });
   }
 
   update() {
-    this.squirtles.children.iterate((squirtle) => {
-      squirtle.nameText.setPosition(squirtle.x, squirtle.y - 50);
-      squirtle.positionXText.setPosition(squirtle.x, squirtle.y + 20);
-      squirtle.positionXText.setText(`X: ${squirtle.x.toFixed(2)}`);
-      this.checkWonRace(squirtle, this.roomID);
-    });
+    if (this.racing) {
+      this.squirtles.children.iterate((squirtle) => {
+        squirtle.nameText.setPosition(squirtle.x, squirtle.y - 50);
+        squirtle.positionXText.setPosition(squirtle.x, squirtle.y + 20);
+        squirtle.positionXText.setText(`X: ${squirtle.x.toFixed(2)}`);
+        this.checkWonRace(squirtle, this.roomID);
+      });
+    }
   }
 
   checkWonRace(squirtle, roomID) {
@@ -150,11 +153,10 @@ class RaceMain extends Phaser.Scene {
 }
 
 SquirtleRace.propTypes = {
-  gameData: PropTypes.object,
-  roomID: PropTypes.string,
+  data: PropTypes.object,
 };
 
-export default function SquirtleRace({ gameData, roomID }) {
+export default function SquirtleRace({ data }) {
   const config = {
     type: Phaser.AUTO,
     parent: "squirtle-race-container",
@@ -180,7 +182,7 @@ export default function SquirtleRace({ gameData, roomID }) {
     autoFocus: false,
   };
   const game = new Phaser.Game(config);
-  game.scene.add("RaceMain", RaceMain, true, gameData, roomID);
+  game.scene.add("RaceMain", RaceMain, true, data);
 
   return (
     <section>
