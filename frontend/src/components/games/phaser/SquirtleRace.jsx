@@ -62,7 +62,9 @@ class RaceMain extends Phaser.Scene {
       squirtle.anims.play("wait");
     });
 
-    const timerLabel = this.add.text(300, 100, "", { fontSize: 40 });
+    const timerLabel = this.add.text(this.gameWidth / 2, 300, "", {
+      fontSize: 40,
+    });
     timerLabel.setOrigin(0.5, 0.5);
 
     this.countdown = new Countdown(this, timerLabel);
@@ -84,26 +86,17 @@ class RaceMain extends Phaser.Scene {
 
       const playerName = self.add.text(
         squirtleInfo.x,
-        squirtleInfo.y - 5,
+        squirtleInfo.y - 10,
         squirtleInfo.name,
         {
           fontSize: "16px",
           fill: "#fff",
         },
       );
-      const positionX = self.add.text(
-        squirtleInfo.x,
-        squirtleInfo.y + 20,
-        `X: ${squirtleInfo.x}`,
-        {
-          fontSize: "16px",
-          fill: "#fff",
-        },
-      );
+
       playerName.setOrigin(0.5, 0.5);
-      positionX.setOrigin(0.5, 0.5);
+
       player.nameText = playerName;
-      player.positionXText = positionX;
 
       self.squirtles.add(player, "johnny");
     }
@@ -121,7 +114,16 @@ class RaceMain extends Phaser.Scene {
         squirtle.setVelocityX(0);
         squirtle.anims.play("wait", true);
       });
-      console.log(winner, trainer);
+      this.add
+        .text(
+          this.gameWidth / 2,
+          300,
+          `${trainer}'s squirtle "${winner}" won!`,
+          {
+            fontSize: 40,
+          },
+        )
+        .setOrigin(0.5, 0.5);
     });
   }
 
@@ -136,16 +138,14 @@ class RaceMain extends Phaser.Scene {
   update() {
     if (this.racing) {
       this.squirtles.children.iterate((squirtle) => {
-        squirtle.nameText.setPosition(squirtle.x, squirtle.y - 50);
-        squirtle.positionXText.setPosition(squirtle.x, squirtle.y + 20);
-        squirtle.positionXText.setText(`X: ${squirtle.x.toFixed(2)}`);
+        squirtle.nameText.setPosition(squirtle.x, squirtle.y - 10);
         this.checkWonRace(squirtle, this.roomID);
       });
     }
   }
 
   checkWonRace(squirtle, roomID) {
-    if (squirtle.body.x >= this.gameWidth - 50) {
+    if (squirtle.body.x >= this.gameWidth - 60) {
       const { name, trainer } = squirtle.data.values;
       this.socket.emit("won-race", { name, trainer }, roomID);
     }
