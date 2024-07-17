@@ -4,7 +4,6 @@
  * Module dependencies.
  */
 
-import { AsyncLocalStorage } from "async_hooks";
 
 var app = require("../app");
 var debug = require("debug")("backend:server");
@@ -290,6 +289,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("won-race", async (squirtle, roomID) => {
+    console.log(squirtle);
     squirtleWon(roomID, io, squirtle);
   });
 

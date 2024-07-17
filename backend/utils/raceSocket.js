@@ -2,8 +2,8 @@ const Room = require("../models/room");
 const countdownDuration = 6000;
 const countdownInterval = 1000;
 const squirtleRaceUpdateInterval = 5000;
-const maxSpeed = 30;
-const minSpeed = 20;
+const maxSpeed = 100;
+const minSpeed = 70;
 
 const addRacerSquirtle = async (
   socket,
@@ -27,8 +27,8 @@ const addRacerSquirtle = async (
       name: squirtle,
       trainer,
       id: socket.id,
-      x: 75,
-      y: Math.floor(Math.random() * 500) + 50,
+      x: 100,
+      y: Math.floor(Math.random() * 100) + 100,
     };
 
     // Initialize gameData if it's null
@@ -140,7 +140,9 @@ function squirtleWon(roomID, io, squirtle) {
       },
     },
   );
-  const { winner, trainer } = squirtle;
+  const winner = squirtle.name;
+  const trainer = squirtle.trainer;
+
   io.to(roomID).emit("winner", winner, trainer);
 }
 
