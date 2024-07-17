@@ -2,6 +2,8 @@ const Room = require("../models/room");
 const countdownDuration = 6000;
 const countdownInterval = 1000;
 const squirtleRaceUpdateInterval = 5000;
+const maxSpeed = 30;
+const minSpeed = 20;
 
 const addRacerSquirtle = async (
   socket,
@@ -25,7 +27,7 @@ const addRacerSquirtle = async (
       name: squirtle,
       trainer,
       id: socket.id,
-      x: Math.floor(Math.random() * 500) + 50,
+      x: 75,
       y: Math.floor(Math.random() * 500) + 50,
     };
 
@@ -80,7 +82,7 @@ const startCountDown = async (room, roomID, io) => {
     if (room.state.gameData.remainingTime <= 0) {
       clearInterval(intervalId);
       io.to(roomID).emit("countdown", "Go!");
-      startSquirtleRace(room.state.gameData.racers, roomID, io);
+      startSquirtleRace(room.state.gameData.racers, roomID, room, io);
     } else {
       let timerMessage =
         room.state.gameData.remainingTime > countdownDuration - 3000
@@ -93,13 +95,22 @@ const startCountDown = async (room, roomID, io) => {
 };
 
 //Start race by emmiting starting velocities
-const startSquirtleRace = (racers, roomID, io) => {
+const startSquirtleRace = async (racers, roomID, room, io) => {
   //Immediately send velocities
   let velocities = generateRandVelocities(racers);
   io.to(roomID).emit("setVelocities", velocities);
 
+  //Save isRacing in state to check if updates should be sent
+  room.state.gameData.isRacing = true;
+  await room.save();
+
   //Update velocities at set intervals
   const raceInterval = setInterval(() => {
+    if (!room.state.gameData.isRacing) {
+      clearInterval(raceInterval);
+      return;
+    }
+
     const velocities = generateRandVelocities(racers);
 
     io.to(roomID).emit("setVelocities", velocities);
@@ -111,12 +122,29 @@ const startSquirtleRace = (racers, roomID, io) => {
 };
 
 const generateRandVelocities = (squirtles) => {
-  return squirtles.map((squirtle) => ({
-    id: squirtle.id,
-    velocity: Math.floor(Math.random() * 3) + 1,
-  }));
+  const minCeiled = Math.ceil(minSpeed);
+  const maxFloored = Math.floor(maxSpeed);
+  return squirtles.reduce((arr, squirtle) => {
+    arr[squirtle.id] =
+      Math.floor(Math.random() * (maxFloored - minCeiled + 1)) + minCeiled;
+    return arr;
+  }, {});
 };
+
+function squirtleWon(roomID, io, squirtle) {
+  Room.findOneAndUpdate(
+    { code: roomID },
+    {
+      $set: {
+        "state.gameData.isRacing": false,
+      },
+    },
+  );
+  const { winner, trainer } = squirtle;
+  io.to(roomID).emit("winner", winner, trainer);
+}
 
 module.exports = {
   addRacerSquirtle,
+  squirtleWon,
 };

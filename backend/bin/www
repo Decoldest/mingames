@@ -4,6 +4,8 @@
  * Module dependencies.
  */
 
+import { AsyncLocalStorage } from "async_hooks";
+
 var app = require("../app");
 var debug = require("debug")("backend:server");
 var http = require("http");
@@ -64,7 +66,7 @@ const { handleAfterVotingDone } = require("../utils/gameSocket");
 
 const { giveDrink } = require("../utils/votingSocket");
 
-const { addRacerSquirtle } = require("../utils/raceSocket");
+const { addRacerSquirtle, squirtleWon } = require("../utils/raceSocket");
 
 /**
  * Socket connection
@@ -285,6 +287,10 @@ io.on("connection", (socket) => {
 
   socket.on("add-squirtle", async (squirtle, username, roomID, callback) => {
     addRacerSquirtle(socket, io, squirtle, username, roomID, callback);
+  });
+
+  socket.on("won-race", async (squirtle, roomID) => {
+    squirtleWon(roomID, io, squirtle);
   });
 
   // Find room player is disconnecting from and remove player
