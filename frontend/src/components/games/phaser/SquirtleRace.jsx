@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { socket } from "../../../socket";
 import PropTypes from "prop-types";
 import Countdown from "./Countdown";
+import { useEffect } from "react";
 
 class RaceMain extends Phaser.Scene {
   constructor() {
@@ -46,6 +47,7 @@ class RaceMain extends Phaser.Scene {
       frameRate: 8,
       repeat: -1,
     });
+
     this.anims.create({
       key: "walk",
       frames: this.anims.generateFrameNumbers("squirtle", { start: 0, end: 1 }),
@@ -61,21 +63,19 @@ class RaceMain extends Phaser.Scene {
     this.squirtles.children.iterate((squirtle) => {
       squirtle.anims.play("wait");
 
-      // Save the user's squirtle for win condition checking
+      // Save the user's squirtle in reference for win condition checking
       if (squirtle.id === this.socket.id) {
         this.mySquirtle = squirtle;
       }
     });
 
+    // Draw timer and start countdown
     const timerLabel = this.add.text(this.gameWidth / 2, 300, "", {
       fontSize: 40,
     });
     timerLabel.setOrigin(0.5, 0.5);
 
     this.countdown = new Countdown(this, timerLabel);
-
-    // Handle keyboard input
-    this.cursors = this.input.keyboard.createCursorKeys();
 
     //Helper function to add a squirtle sprite into the game
     function addPlayer(self, squirtleInfo) {
@@ -84,11 +84,12 @@ class RaceMain extends Phaser.Scene {
         .setOrigin(0.5, 0.5);
 
       player.setScale(2);
-      player.id = squirtleInfo.id;
+      const { id, name, trainer } = squirtleInfo;
+      player.id = id;
+      player.name = name;
+      player.trainer = trainer;
 
-      player.setData("name", squirtleInfo.name);
-      player.setData("trainer", squirtleInfo.trainer);
-
+      // Add nametag on top of squirtle
       const playerName = self.add.text(
         squirtleInfo.x,
         squirtleInfo.y - 10,
@@ -100,12 +101,12 @@ class RaceMain extends Phaser.Scene {
       );
 
       playerName.setOrigin(0.5, 0.5);
-
       player.nameText = playerName;
 
-      self.squirtles.add(player, "johnny");
+      self.squirtles.add(player);
     }
 
+    // Update velocities on setVelocities event
     this.socket.on("setVelocities", (velocities) => {
       if (this.racing === true) {
         this.updateVelocities(velocities);
@@ -115,10 +116,9 @@ class RaceMain extends Phaser.Scene {
     this.socket.on("winner", (winner, trainer) => {
       this.racing = false;
 
-      this.squirtles.children.iterate((squirtle) => {
-        squirtle.setVelocityX(0);
-        squirtle.anims.play("wait", true);
-      });
+      // Stop animations and movement
+      this.stop();
+
       this.add
         .text(
           this.gameWidth / 2,
@@ -129,6 +129,13 @@ class RaceMain extends Phaser.Scene {
           },
         )
         .setOrigin(0.5, 0.5);
+    });
+  }
+
+  stop() {
+    this.squirtles.children.iterate((squirtle) => {
+      squirtle.setVelocityX(0);
+      squirtle.anims.play("wait", true);
     });
   }
 
@@ -151,7 +158,7 @@ class RaceMain extends Phaser.Scene {
 
   checkWonRace(squirtle, roomID) {
     if (squirtle.body.x >= this.gameWidth - 60) {
-      const { name, trainer } = squirtle.data.values;
+      const { name, trainer } = squirtle;
       this.socket.emit("won-race", { name, trainer }, roomID);
     }
   }
@@ -162,36 +169,98 @@ SquirtleRace.propTypes = {
 };
 
 export default function SquirtleRace({ data }) {
-  const config = {
-    type: Phaser.AUTO,
-    parent: "squirtle-race-container",
-    width: 1280,
-    height: 720,
-    scale: {
-      mode: Phaser.Scale.FIT,
-      autoCenter: Phaser.Scale.CENTER_BOTH,
-    },
-    physics: {
-      default: "arcade",
-      arcade: {
-        gravity: { y: 0 },
-        debug: false,
+  useEffect(() => {
+    const config = {
+      type: Phaser.AUTO,
+      parent: "squirtle-race-container",
+      width: 1280,
+      height: 720,
+      scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
       },
-    },
-    pixelArt: true,
-    antialias: false,
-    fps: {
-      target: 30,
-      forceSetTimeOut: true,
-    },
-    autoFocus: false,
-  };
-  const game = new Phaser.Game(config);
-  game.scene.add("RaceMain", RaceMain, true, data);
+      physics: {
+        default: "arcade",
+        arcade: {
+          gravity: { y: 0 },
+          debug: false,
+        },
+      },
+      pixelArt: true,
+      antialias: false,
+      fps: {
+        target: 30,
+        forceSetTimeOut: true,
+      },
+      autoFocus: false,
+      callbacks: {
+        postBoot: (game) => {
+          const canvas = game.canvas;
+          const container = document.getElementById("squirtle-race-container");
+          container.appendChild(canvas);
+        },
+      },
+    };
+    const game = new Phaser.Game(config);
+    game.scene.add("RaceMain", RaceMain, true, data);
+
+    // Show orientation change on small screens credit - Tajammal Maqbool
+    const OnChangeScreen = () => {
+      let isLandscape = screen.orientation.type.includes("landscape");
+      let rotateAlert = document.getElementById("rotateAlert");
+      if (rotateAlert) {
+        if (isLandscape) {
+          if (rotateAlert.classList.contains("flex")) {
+            rotateAlert.classList.replace("flex", "hidden");
+          } else {
+            rotateAlert.classList.add("hidden");
+          }
+        } else {
+          if (rotateAlert.classList.contains("hidden")) {
+            rotateAlert.classList.replace("hidden", "flex");
+          } else {
+            rotateAlert.classList.add("flex");
+          }
+        }
+      }
+    };
+    OnChangeScreen();
+
+    let _orientation =
+      screen.orientation || screen.mozOrientation || screen.msOrientation;
+    _orientation.addEventListener("change", function (e) {
+      OnChangeScreen();
+    });
+    window.addEventListener("resize", function (e) {
+      OnChangeScreen();
+    });
+
+    return () => {
+      _orientation.removeEventListener("change", OnChangeScreen);
+      window.removeEventListener("resize", OnChangeScreen);
+    };
+  }, [data]);
 
   return (
-    <section>
-      <div id="squirtle-race-container"></div>
-    </section>
+    <>
+      <div id="squirtle-race-container" className="h-screen w-screen">
+        <div
+          className="hidden flex-col items-center justify-center bg-[#93c8d0] w-full h-screen"
+          id="rotateAlert"
+        >
+          <svg
+            className="w-20 h-20 sm:w-32 sm:h-32 fill-white"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M21.323 8.616l-4.94-4.94a1.251 1.251 0 0 0-1.767 0l-10.94 10.94a1.251 1.251 0 0 0 0 1.768l4.94 4.94a1.25 1.25 0 0 0 1.768 0l10.94-10.94a1.251 1.251 0 0 0 0-1.768zM14 5.707L19.293 11 11.5 18.793 6.207 13.5zm-4.323 14.91a.25.25 0 0 1-.354 0l-1.47-1.47.5-.5-2-2-.5.5-1.47-1.47a.25.25 0 0 1 0-.354L5.5 14.207l5.293 5.293zm10.94-10.94l-.617.616L14.707 5l.616-.616a.25.25 0 0 1 .354 0l4.94 4.94a.25.25 0 0 1 0 .353zm1.394 6.265V18a3.003 3.003 0 0 1-3 3h-3.292l1.635 1.634-.707.707-2.848-2.847 2.848-2.848.707.707L15.707 20h3.304a2.002 2.002 0 0 0 2-2v-2.058zM4 9H3V7a3.003 3.003 0 0 1 3-3h3.293L7.646 2.354l.707-.707 2.848 2.847L8.354 7.34l-.707-.707L9.28 5H6a2.002 2.002 0 0 0-2 2z" />
+            <path fill="none" d="M0 0h24v24H0z" />
+          </svg>
+          <span className="text-white text-center block text-sm sm:text-2xl">
+            Please rotate your device to landscape mode
+          </span>
+        </div>
+      </div>
+    </>
   );
 }

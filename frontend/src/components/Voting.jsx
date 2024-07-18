@@ -20,6 +20,7 @@ export default function Voting({
   const [warning, setWarning] = useState(null);
   const [votingResults, setVotingResults] = useState(-1);
   const { username } = useContext(UserContext);
+  const [isDoneDrinking, setIsDoneDrinking] = useState(false);
 
   useEffect(() => {
     //Set the current user's drinks to give
@@ -85,7 +86,9 @@ export default function Voting({
                   <button
                     onClick={() => {
                       addDrink(name);
+                      setIsDoneDrinking(true);
                     }}
+                    disabled={isDoneDrinking}
                   >
                     Give Drink
                   </button>

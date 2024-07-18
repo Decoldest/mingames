@@ -44,7 +44,7 @@ export default function Race({
   };
 
   return (
-    <section>
+    <>
       {!isNamed ? (
         <div className="squirtle-sprite">
           <h2>Name your squirtle</h2>
@@ -66,13 +66,18 @@ export default function Race({
             />
             <button onClick={() => submitSquirtleName()}>Done</button>
           </div>
+          <span>
+            Note: On smaller screens the display will be rotated to landscape.
+          </span>
           {waitingMessage && <h2>{waitingMessage}</h2>}
         </div>
       ) : (
-        <div className={`${window.innerWidth < 600 ? "rotate-container" : ""}`}>
+        // Rotate on smaller screens
+        <div className={"h-screen w-screen"}>
           <SquirtleRace data={{ gameData, roomID }} />
+          
         </div>
       )}
-    </section>
+    </>
   );
 }

@@ -45,7 +45,7 @@ export default function Trivia({
   };
 
   return (
-    <div>
+    <>
       <div>
         <h2>Round: {round + 1} / 5</h2>
         {/* Decode html before displaying */}
@@ -68,7 +68,7 @@ export default function Trivia({
       </div>
 
       {waitingMessage && <h2>{waitingMessage}</h2>}
-    </div>
+    </>
   );
 }
 

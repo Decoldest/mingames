@@ -62,6 +62,7 @@ export default function Wager({ roomID }) {
                 setWager(e.target.value);
                 setWarning(null);
               }}
+              readOnly
               placeholder="Enter number of drinks"
             />
             <button onClick={handleIncrement}>+</button>
