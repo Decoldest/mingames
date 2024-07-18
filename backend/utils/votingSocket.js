@@ -56,12 +56,16 @@ const handleStartVoting = (io, roomID, votingData) => {
     Object.values(votingData).forEach((player) => {
       player.message = "You all got the question wrong lol";
     });
+    // Change state to voting
     io.to(roomID).emit("start-voting", votingData);
+
+    // Give out drinks immediately since no player can allocate any
     io.to(roomID).emit("all-drinks-given", votingData);
   } else if (
     Object.values(votingData).every((player) => player.drinksToGive === 0)
   ) {
     Object.values(votingData).forEach((player) => {
+      // Checks for players who joined late and could not wager
       if (player.correct) {
         player.message = "You were correct but you didn't place a wager";
       }
@@ -69,14 +73,19 @@ const handleStartVoting = (io, roomID, votingData) => {
     io.to(roomID).emit("start-voting", votingData);
     io.to(roomID).emit("all-drinks-given", votingData);
   } else {
-    console.log("voting starting in room ", roomID);
     io.to(roomID).emit("start-voting", votingData);
     setVotingData(roomID, votingData);
   }
 };
 
+const handleRaceWinnerVoting = (io, roomID, votingData) => {
+  io.to(roomID).emit("start-voting", votingData);
+  setVotingData(roomID, votingData);
+}
+
 module.exports = {
   setVotingData,
   giveDrink,
   handleStartVoting,
+  handleRaceWinnerVoting,
 };

@@ -46,6 +46,10 @@ const handleAfterVotingDone = async (socket, io, roomID) => {
       case "Trivia":
         await setNextTriviaQuestion(room, continueGame, endGame);
         break;
+      case "Race":
+        //End game since nothing left to do
+        endGame();
+        break;
     }
   }
 };

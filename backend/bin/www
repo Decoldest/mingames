@@ -289,7 +289,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("won-race", async (squirtle, roomID) => {
-    console.log(squirtle);
     squirtleWon(roomID, io, squirtle);
   });
 

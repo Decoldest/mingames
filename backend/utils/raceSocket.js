@@ -1,9 +1,12 @@
 const Room = require("../models/room");
-const countdownDuration = 6000;
-const countdownInterval = 1000;
+const COUNTDOWN_DURATION = 6000;
+const COUNTDOWN_INTERVAL = 1000;
 const squirtleRaceUpdateInterval = 5000;
-const maxSpeed = 100;
-const minSpeed = 70;
+const MAX_SPEED = 50;
+const MIN_SPEED = 30;
+const INITIAL_X = 750;
+
+const { handleRaceWinnerVoting } = require("./votingSocket");
 
 const addRacerSquirtle = async (
   socket,
@@ -27,8 +30,8 @@ const addRacerSquirtle = async (
       name: squirtle,
       trainer,
       id: socket.id,
-      x: 100,
-      y: Math.floor(Math.random() * 100) + 100,
+      x: INITIAL_X,
+      y: Math.floor(Math.random() * (500 - 100)) + 100,
     };
 
     // Initialize gameData if it's null
@@ -73,11 +76,11 @@ const checkAllSquirtlesNamed = async (room, roomID, io) => {
 const startCountDown = async (room, roomID, io) => {
   room.state.gameData = {
     ...room.state.gameData,
-    remainingTime: countdownDuration,
+    remainingTime: COUNTDOWN_DURATION,
   };
 
   const intervalId = setInterval(async () => {
-    room.state.gameData.remainingTime -= countdownInterval;
+    room.state.gameData.remainingTime -= COUNTDOWN_INTERVAL;
 
     if (room.state.gameData.remainingTime <= 0) {
       clearInterval(intervalId);
@@ -85,13 +88,14 @@ const startCountDown = async (room, roomID, io) => {
       startSquirtleRace(room.state.gameData.racers, roomID, room, io);
     } else {
       let timerMessage =
-        room.state.gameData.remainingTime > countdownDuration - 3000
+        room.state.gameData.remainingTime > COUNTDOWN_DURATION - 3000
           ? "Squirtles Ready!"
           : Math.ceil(room.state.gameData.remainingTime / 1000);
+
       io.to(roomID).emit("countdown", timerMessage);
       await room.save();
     }
-  }, countdownInterval);
+  }, COUNTDOWN_INTERVAL);
 };
 
 //Start race by emmiting starting velocities
@@ -122,8 +126,8 @@ const startSquirtleRace = async (racers, roomID, room, io) => {
 };
 
 const generateRandVelocities = (squirtles) => {
-  const minCeiled = Math.ceil(minSpeed);
-  const maxFloored = Math.floor(maxSpeed);
+  const minCeiled = Math.ceil(MIN_SPEED);
+  const maxFloored = Math.floor(MAX_SPEED);
   return squirtles.reduce((arr, squirtle) => {
     arr[squirtle.id] =
       Math.floor(Math.random() * (maxFloored - minCeiled + 1)) + minCeiled;
@@ -144,7 +148,39 @@ function squirtleWon(roomID, io, squirtle) {
   const trainer = squirtle.trainer;
 
   io.to(roomID).emit("winner", winner, trainer);
+  updateWinnerAndLosers(trainer, roomID, io);
 }
+
+const updateWinnerAndLosers = async (trainer, roomID, io) => {
+  const room = await Room.findOne({ code: roomID }).populate("players");
+
+  const drinkData = {};
+
+  room.players.forEach(async (player) => {
+    // Update drink data - winner has drinks to give, losers drink their wager
+    if (player.username === trainer) {
+      drinkData[player.username] = {
+        drinksToGive: Number(player.wager),
+        myDrinks: 0,
+        won: true,
+        message: "Your squirtle won! LFGGGG!",
+      };
+    } else {
+      drinkData[player.username] = {
+        drinksToGive: 0,
+        myDrinks: Number(player.wager),
+        won: false,
+        message: "You lost! Get better bud!",
+      };
+    }
+    await player.save();
+  });
+
+  // Wait 2 seconds before starting voting process
+  setTimeout(function () {
+    handleRaceWinnerVoting(io, roomID, drinkData);
+  }, 3000);
+};
 
 module.exports = {
   addRacerSquirtle,
