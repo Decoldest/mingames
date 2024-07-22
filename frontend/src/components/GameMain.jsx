@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import Trivia from "./games/Trivia";
 import Race from "./games/Race";
 import Voting from "./Voting";
+import HotPotato from "./games/HotPotato";
 import { socket } from "../socket";
 
 GameMain.propTypes = {
@@ -30,6 +31,10 @@ export default function GameMain({ isPartyLeader, state, setState }) {
       description: `You will get a squirtle that will race the other players' squirtles. Wager a number of drinks 
       on your squirtle winning the race. Winner gets to give drinks out. Losers will
       drink their wager plus any additional drinks given to them.`,
+    },
+    "Hot Potato": {
+      component: HotPotato,
+      description: `It's literally hot potato. People who have a potato at the end of the game drink`,
     },
   };
 

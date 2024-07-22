@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import UserContext from "./UserContext";
 import { socket } from "../socket";
+import { useNavigate } from "react-router-dom";
 
 WaitingRoom.propTypes = {
   isPartyLeader: PropTypes.bool,
@@ -14,6 +15,7 @@ export default function WaitingRoom({ isPartyLeader }) {
   const [messageInput, setMessageInput] = useState("");
   const [messages, setMessages] = useState([]);
   const messageContainerRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const addMessage = (message) => {
@@ -32,16 +34,24 @@ export default function WaitingRoom({ isPartyLeader }) {
       addMessage(`${username}: ${message}`);
     };
 
+    const returnToHome = () => {
+      console.log("returning ti gome");
+      navigate("/");
+    };
+
     socket.on("joined-room", handleJoinedRoom);
     socket.on("left-room", handleLeftRoom);
     socket.on("receive-message", handleReceiveMessage);
+    socket.on("receive-message", handleReceiveMessage);
+    socket.on("return-main", returnToHome);
 
     return () => {
       socket.off("joined-room", handleJoinedRoom);
       socket.off("left-room", handleLeftRoom);
       socket.off("receive-message", handleReceiveMessage);
+      socket.off("return-main", returnToHome);
     };
-  }, []);
+  }, [navigate]);
 
   const sendMessage = () => {
     if (messageInput.trim() !== "") {

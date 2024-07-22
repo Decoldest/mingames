@@ -31,7 +31,7 @@ const addRacerSquirtle = async (
       trainer,
       id: socket.id,
       x: INITIAL_X,
-      y: Math.floor(Math.random() * (500 - 100)) + 100,
+      y: Math.floor(Math.random() * (800 - 100)) + 100,
     };
 
     // Initialize gameData if it's null

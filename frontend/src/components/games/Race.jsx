@@ -75,7 +75,6 @@ export default function Race({
         // Rotate on smaller screens
         <div className={"h-screen w-screen"}>
           <SquirtleRace data={{ gameData, roomID }} />
-          
         </div>
       )}
     </>

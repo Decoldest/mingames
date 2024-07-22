@@ -4,7 +4,6 @@
  * Module dependencies.
  */
 
-
 var app = require("../app");
 var debug = require("debug")("backend:server");
 var http = require("http");
@@ -66,6 +65,8 @@ const { handleAfterVotingDone } = require("../utils/gameSocket");
 const { giveDrink } = require("../utils/votingSocket");
 
 const { addRacerSquirtle, squirtleWon } = require("../utils/raceSocket");
+
+const { sendPlayers, giveHotPotato } = require("../utils/potatoSocket");
 
 /**
  * Socket connection
@@ -212,7 +213,7 @@ io.on("connection", (socket) => {
         },
         { $set: { "state.selectedGame": game } },
         { new: true },
-      );
+      ).populate("players");
 
       if (!room) {
         socket.emit("warning", "Room not found");
@@ -223,7 +224,7 @@ io.on("connection", (socket) => {
       io.to(roomID).emit("set-game-selection", game);
 
       //Fetch data or set up data for the game
-      prepareGameData(io, roomID, game);
+      prepareGameData(io, roomID, room, game);
     } catch (error) {
       console.error("Error handling game selection: ", error);
     }
@@ -292,6 +293,12 @@ io.on("connection", (socket) => {
     squirtleWon(roomID, io, squirtle);
   });
 
+  socket.on("give-potato", async(roomID, username, receiver) => {
+    console.log(receiver);
+    console.log(username);
+    giveHotPotato(io, roomID, username, receiver);
+  })
+
   // Find room player is disconnecting from and remove player
   socket.on("disconnect", async () => {
     try {
@@ -324,6 +331,7 @@ io.on("connection", (socket) => {
         console.log(
           `Room ${room._id} deleted because there are no players left.`,
         );
+        io.to(room.code).emit("return-main");
       }
     } catch (error) {
       console.error("Error handling disconnect: ", error);
@@ -331,9 +339,11 @@ io.on("connection", (socket) => {
   });
 });
 
-function prepareGameData(io, roomId, game) {
+function prepareGameData(io, roomID, room, game) {
   if (game === "Trivia") {
-    sendTriviaQuestions(io, roomId);
+    sendTriviaQuestions(io, roomID);
+  } else if (game === "Hot Potato") {
+    sendPlayers(io, roomID, room);
   }
 }
 
