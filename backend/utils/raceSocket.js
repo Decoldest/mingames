@@ -74,16 +74,17 @@ const checkAllSquirtlesNamed = async (room, roomID, io) => {
 
 //Emit a countdown to the client
 const startCountDown = async (room, roomID, io) => {
+  
   room.state.gameData = {
     ...room.state.gameData,
     remainingTime: COUNTDOWN_DURATION,
   };
 
-  const intervalId = setInterval(async () => {
+  const intervalID = setInterval(async () => {
     room.state.gameData.remainingTime -= COUNTDOWN_INTERVAL;
 
     if (room.state.gameData.remainingTime <= 0) {
-      clearInterval(intervalId);
+      clearInterval(intervalID);
       io.to(roomID).emit("countdown", "Go!");
       startSquirtleRace(room.state.gameData.racers, roomID, room, io);
     } else {
@@ -122,7 +123,7 @@ const startSquirtleRace = async (racers, roomID, room, io) => {
 
   setTimeout(() => {
     clearInterval(raceInterval);
-  }, 100000);
+  }, 10000);
 };
 
 const generateRandVelocities = (squirtles) => {

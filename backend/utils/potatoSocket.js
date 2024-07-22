@@ -1,6 +1,9 @@
 const Room = require("../models/room");
 
-const sendPlayers = async (io, roomID, room) => {
+const MAX_TIMER = 600;
+const TIMER_INTERVAL = 100;
+
+const sendPlayersAndStartTimer = async (io, roomID, room) => {
   const { players } = room;
   const gameData = giveRandomPersonPotato(players);
 
@@ -8,6 +11,8 @@ const sendPlayers = async (io, roomID, room) => {
   await room.save();
 
   io.to(roomID).emit("game-data", room.state.gameData);
+
+  startTimer(io, roomID);
 };
 
 //Create a new array with the player usernames and assign a random potato
@@ -41,4 +46,18 @@ const giveHotPotato = async (io, roomID, giver, receiver) => {
   io.to(roomID).emit("threw-potato", updatedRoom.state.gameData);
 };
 
-module.exports = { sendPlayers, giveHotPotato };
+// Start for game and emit time
+const startTimer = (io, roomID) => {
+  let timer = MAX_TIMER;
+
+  // Set interval to emit timer
+  const timerID = setInterval(() => {
+    io.to(roomID).emit("timer", (timer / 10).toFixed(1));
+    timer--;
+    if (timer <= 0) {
+      clearInterval(timerID);
+    }
+  }, TIMER_INTERVAL);
+};
+
+module.exports = { sendPlayersAndStartTimer, giveHotPotato };
