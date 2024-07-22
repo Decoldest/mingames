@@ -77,8 +77,19 @@ export default function Homepage() {
         setError(response.message);
       }
     });
-    
   };
+
+  const errorHandler = (error) => {
+    setError(error);
+  };
+
+  const usernameHandler = (username) => {
+    setUsername(username);
+  };
+
+  const roomHandler = (roomID) => {
+    setRoomID(roomID)
+  }
 
   return (
     <main>
@@ -87,11 +98,11 @@ export default function Homepage() {
         handleCreateRoom={handleCreateRoom}
         handleJoinRoom={handleJoinRoom}
         error={error}
-        setError={setError}
+        errorHandler={errorHandler}
         username={username}
-        setUsername={setUsername}
+        usernameHandler={usernameHandler}
         roomID={roomID}
-        setRoomID={setRoomID}
+        roomHandler={roomHandler}
       />
     </main>
   );

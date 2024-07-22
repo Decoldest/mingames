@@ -5,11 +5,11 @@ Join.propTypes = {
   handleCreateRoom: PropTypes.func,
   handleJoinRoom: PropTypes.func,
   error: PropTypes.string,
-  setError: PropTypes.func,
+  errorHandler: PropTypes.func,
   username: PropTypes.string,
-  setUsername: PropTypes.func,
+  usernameHandler: PropTypes.func,
   roomID: PropTypes.string,
-  setRoomID: PropTypes.func,
+  roomHandler: PropTypes.func,
 };
 
 export default function Join({
@@ -17,13 +17,12 @@ export default function Join({
   handleCreateRoom,
   handleJoinRoom,
   error,
-  setError,
+  errorHandler,
   username,
-  setUsername,
+  usernameHandler,
   roomID,
-  setRoomID
+  roomHandler,
 }) {
-
   return (
     <section>
       <h1>MiniGames.io</h1>
@@ -31,8 +30,8 @@ export default function Join({
         type="text"
         value={username}
         onChange={(e) => {
-          setUsername(e.target.value);
-          setError(null);
+          usernameHandler(e.target.value);
+          errorHandler(null);
         }}
         placeholder="Enter your name"
       />
@@ -43,8 +42,8 @@ export default function Join({
             type="text"
             value={roomID}
             onChange={(e) => {
-              setRoomID(e.target.value);
-              setError(null);
+              roomHandler(e.target.value);
+              errorHandler(null);
             }}
             placeholder="Enter Room ID"
           />

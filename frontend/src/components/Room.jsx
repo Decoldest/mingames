@@ -72,7 +72,6 @@ export default function Room() {
   const joinRoom = () => {
     socket.emit("join-room", roomID, username, (response) => {
       if (response.success) {
-        console.log(response.state);
         setState(response.state);
       } else {
         setError(response.message);
@@ -86,6 +85,14 @@ export default function Room() {
         waiting: true,
       }));
     });
+  };
+
+  const errorHandler = (error) => {
+    setError(error);
+  };
+
+  const usernameHandler = (username) => {
+    setUsername(username);
   };
 
   return (
@@ -103,9 +110,9 @@ export default function Room() {
           creatingRoom={false}
           handleJoinRoom={handleJoinRoom}
           error={error}
-          setError={setError}
+          errorHandler={errorHandler}
           username={username}
-          setUsername={setUsername}
+          usernameHandler={usernameHandler}
         />
       )}
     </main>

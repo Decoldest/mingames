@@ -117,6 +117,21 @@ export default function GameMain({ isPartyLeader, state, setState }) {
     socket.emit("done-voting-phase", roomID);
   };
 
+  const handleWaitingMessage = (message) => {
+    setState((prevState) => ({
+      ...prevState,
+      waitingMessage: message,
+    }));
+  };
+
+  const handleVotingData = (data) => {
+    setState((prevState) => ({ ...prevState, votingData: data }));
+  };
+
+  const handleChangeGameData = (data) => {
+    setState((prevState) => ({ ...prevState, gameData: data }));
+  };
+
   return (
     <section>
       {isWagering ? (
@@ -132,9 +147,7 @@ export default function GameMain({ isPartyLeader, state, setState }) {
         <Voting
           votingData={votingData}
           roomID={roomID}
-          setVotingData={(data) =>
-            setState((prevState) => ({ ...prevState, votingData: data }))
-          }
+          setVotingData={handleVotingData}
           doneVotingPhase={doneVotingPhase}
         />
       ) : selectedGame ? (
@@ -143,12 +156,8 @@ export default function GameMain({ isPartyLeader, state, setState }) {
             gameData={gameData}
             roomID={roomID}
             waitingMessage={waitingMessage}
-            setWaitingMessage={(message) =>
-              setState((prevState) => ({
-                ...prevState,
-                waitingMessage: message,
-              }))
-            }
+            setWaitingMessage={handleWaitingMessage}
+            changeGameData={handleChangeGameData}
           />
         )
       ) : (
