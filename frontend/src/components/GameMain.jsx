@@ -171,6 +171,7 @@ export default function GameMain({ isPartyLeader, state, setState }) {
               {game}
             </button>
           ))}
+          {!isPartyLeader && <h2>Party leader will select game.</h2>}
         </div>
       )}
     </section>
