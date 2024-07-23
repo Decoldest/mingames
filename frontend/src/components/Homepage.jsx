@@ -92,7 +92,7 @@ export default function Homepage() {
   }
 
   return (
-    <main>
+    <main className="font-sans m-4">
       <Join
         creatingRoom={true}
         handleCreateRoom={handleCreateRoom}

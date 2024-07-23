@@ -7,6 +7,7 @@ import Race from "./games/Race";
 import Voting from "./Voting";
 import HotPotato from "./games/HotPotato";
 import { socket } from "../socket";
+import ButtonPress from "./games/ButtonPress";
 
 GameMain.propTypes = {
   isPartyLeader: PropTypes.bool,
@@ -35,6 +36,11 @@ export default function GameMain({ isPartyLeader, state, setState }) {
     "Hot Potato": {
       component: HotPotato,
       description: `It's literally hot potato. People who have a potato at the end of the game drink`,
+    },
+    "Button Press": {
+      component: ButtonPress,
+      description: `Press the button as many times as possible before the timer ends. The player with the most button presses
+      is safe. The other players drink.`,
     },
   };
 

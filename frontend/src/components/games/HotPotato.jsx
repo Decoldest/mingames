@@ -45,9 +45,7 @@ export default function HotPotato({ roomID, gameData, changeGameData }) {
 
   return (
     <>
-      <div>
-        <h1>{timer}</h1>
-      </div>
+      <div>{timer}</div>
       <div>
         {Object.entries(gameData).map(([player, potato], i) =>
           player.localeCompare(username) === 0 ? (
@@ -55,8 +53,8 @@ export default function HotPotato({ roomID, gameData, changeGameData }) {
               <h1>{player}</h1>
               {playerHasPotato && (
                 <>
-                  <h2>You have the potato</h2>
                   <p>potato</p>
+                  <h2>You have the potato</h2>
                 </>
               )}
             </div>

@@ -69,7 +69,7 @@ const handleStartVoting = (io, roomID, votingData) => {
       if (player.correct) {
         player.message = "You were correct but you didn't place a wager";
       }
-    }); 
+    });
     io.to(roomID).emit("start-voting", votingData);
     io.to(roomID).emit("all-drinks-given", votingData);
   } else {
@@ -81,11 +81,14 @@ const handleStartVoting = (io, roomID, votingData) => {
 const handleRaceWinnerVoting = (io, roomID, votingData) => {
   io.to(roomID).emit("start-voting", votingData);
   setVotingData(roomID, votingData);
-}
+};
+
+const handlePotatoWinnerVoting = handleRaceWinnerVoting;
 
 module.exports = {
   setVotingData,
   giveDrink,
   handleStartVoting,
   handleRaceWinnerVoting,
+  handlePotatoWinnerVoting,
 };

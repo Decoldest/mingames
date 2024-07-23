@@ -1,4 +1,5 @@
 const Room = require("../models/room");
+const { handlePotatoWinnerVoting } = require("./votingSocket");
 
 const MAX_TIMER = 600;
 const TIMER_INTERVAL = 100;
@@ -56,8 +57,43 @@ const startTimer = (io, roomID) => {
     timer--;
     if (timer <= 0) {
       clearInterval(timerID);
+      endHotPotato(io, roomID);
     }
   }, TIMER_INTERVAL);
+};
+
+const endHotPotato = async (io, roomID) => {
+  //Disable client button to pass potato
+  io.to(roomID).emit("end-game");
+
+  const room = await Room.findOne({ code: roomID }).populate("players");
+  const results = room.state.gameData;
+  updateWinnersAndLoser(results, room, io, roomID);
+};
+
+const updateWinnersAndLoser = (results, room, io, roomID) => {
+  const drinkData = {};
+  console.log(results);
+
+  room.players.forEach(async (player) => {
+    // Update drink data - winner has drinks to give, loser drinks their wager
+    if (results[player.username].hasPotato) {
+      drinkData[player.username] = {
+        drinksToGive: Number(player.wager),
+        myDrinks: 0,
+        won: true,
+        message: "You didn't get burned by the potato.",
+      };
+    } else {
+      drinkData[player.username] = {
+        drinksToGive: 0,
+        myDrinks: Number(player.wager),
+        won: false,
+        message: "You got scorched by the potato",
+      };
+    }
+  });
+  handlePotatoWinnerVoting(io, roomID, drinkData);
 };
 
 module.exports = { sendPlayersAndStartTimer, giveHotPotato };

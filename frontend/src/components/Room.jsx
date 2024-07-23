@@ -96,7 +96,7 @@ export default function Room() {
   };
 
   return (
-    <main>
+    <main className="font-sans m-4">
       {waiting ? (
         <WaitingRoom username={username} isPartyLeader={isPartyLeader} />
       ) : playing ? (

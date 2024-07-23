@@ -66,6 +66,7 @@ export default function WaitingRoom({ isPartyLeader }) {
 
   return (
     <section>
+      <h1>Minigames.io</h1>
       <h1>{roomID}</h1>
       Waiting for players to join...
       <div className="message-container" ref={messageContainerRef}>

@@ -131,8 +131,8 @@ const generateRandVelocities = (squirtles) => {
   }, {});
 };
 
-function squirtleWon(roomID, io, squirtle) {
-  Room.findOneAndUpdate(
+async function squirtleWon(roomID, io, squirtle) {
+  await Room.findOneAndUpdate(
     { code: roomID },
     {
       $set: {
@@ -169,7 +169,6 @@ const updateWinnerAndLosers = async (trainer, roomID, io) => {
         message: "You lost! Get better bud!",
       };
     }
-    await player.save();
   });
 
   // Wait 2 seconds before starting voting process
