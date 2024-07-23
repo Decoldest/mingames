@@ -4,7 +4,7 @@ const COUNTDOWN_INTERVAL = 1000;
 const squirtleRaceUpdateInterval = 5000;
 const MAX_SPEED = 50;
 const MIN_SPEED = 30;
-const INITIAL_X = 750;
+const INITIAL_X = 100;
 
 const { handleRaceWinnerVoting } = require("./votingSocket");
 
@@ -31,7 +31,7 @@ const addRacerSquirtle = async (
       trainer,
       id: socket.id,
       x: INITIAL_X,
-      y: Math.floor(Math.random() * (800 - 100)) + 100,
+      y: Math.floor(Math.random() * (600 - 100)) + 100,
     };
 
     // Initialize gameData if it's null

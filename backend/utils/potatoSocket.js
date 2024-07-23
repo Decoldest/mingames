@@ -11,7 +11,7 @@ const sendPlayersAndStartTimer = async (io, roomID, room) => {
   room.state.gameData = gameData;
   await room.save();
 
-  io.to(roomID).emit("game-data", room.state.gameData);
+  io.to(roomID).emit("game-data", gameData);
 
   startTimer(io, roomID);
 };
@@ -67,6 +67,9 @@ const endHotPotato = async (io, roomID) => {
   io.to(roomID).emit("end-game");
 
   const room = await Room.findOne({ code: roomID }).populate("players");
+
+  if (!room) return;
+  
   const results = room.state.gameData;
   updateWinnersAndLoser(results, room, io, roomID);
 };

@@ -66,7 +66,15 @@ const { giveDrink } = require("../utils/votingSocket");
 
 const { addRacerSquirtle, squirtleWon } = require("../utils/raceSocket");
 
-const { sendPlayersAndStartTimer, giveHotPotato } = require("../utils/potatoSocket");
+const {
+  sendPlayersAndStartTimer,
+  giveHotPotato,
+} = require("../utils/potatoSocket");
+
+const {
+  sendButtonsAndStartTimer,
+  updateScore,
+} = require("../utils/buttonSocket");
 
 /**
  * Socket connection
@@ -293,12 +301,16 @@ io.on("connection", (socket) => {
     squirtleWon(roomID, io, squirtle);
   });
 
-  socket.on("give-potato", async(roomID, username, receiver) => {
+  socket.on("give-potato", async (roomID, username, receiver) => {
     console.log(receiver);
     console.log(username);
     giveHotPotato(io, roomID, username, receiver);
-  })
+  });
 
+  socket.on("pressed-button", (roomID, username, score) => {
+    updateScore(io, roomID, username, score);
+  });
+  
   // Find room player is disconnecting from and remove player
   socket.on("disconnect", async () => {
     try {
@@ -344,6 +356,8 @@ function prepareGameData(io, roomID, room, game) {
     sendTriviaQuestions(io, roomID);
   } else if (game === "Hot Potato") {
     sendPlayersAndStartTimer(io, roomID, room);
+  } else if (game == "Button Press") {
+    sendButtonsAndStartTimer(io, roomID, room);
   }
 }
 
