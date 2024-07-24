@@ -69,6 +69,13 @@ export default function GameMain({ isPartyLeader, state, setState }) {
       setState(state);
     };
 
+    const handleLatePlayer = (data) => {
+      setState((prevState) => ({
+        ...prevState,
+        gameData: { ...prevState.gameData, ...data },
+      }));
+    };
+
     //Resets the screen to game selection state
     const handleEndGame = () => {
       setState({
@@ -89,6 +96,7 @@ export default function GameMain({ isPartyLeader, state, setState }) {
     socket.on("start-voting", handleVotingData);
     socket.on("update-game", handleContinueGame);
     socket.on("end-game", handleEndGame);
+    socket.on("late-player-data", handleLatePlayer);
 
     return () => {
       socket.off("game-data", handleGameData);
@@ -98,8 +106,9 @@ export default function GameMain({ isPartyLeader, state, setState }) {
       socket.off("start-voting", handleVotingData);
       socket.off("update-game", handleContinueGame);
       socket.off("end-game", handleEndGame);
+      socket.off("late-player-data", handleLatePlayer);
     };
-  }, [setState]);
+  }, [setState, gameData]);
 
   const setWageringPhase = () => {
     if (isPartyLeader) {

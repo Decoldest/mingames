@@ -44,6 +44,7 @@ export default function Wager({ roomID }) {
 
   const placeWager = () => {
     socket.emit("place-wager", roomID, wager);
+    console.log("wager", wager);
   };
 
   return (
