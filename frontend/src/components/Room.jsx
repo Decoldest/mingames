@@ -58,6 +58,9 @@ export default function Room() {
       socket.off("error", handleError);
       socket.on("start-game", handleStartGame);
       socket.off("disconnect", handleDisconnect);
+
+      //send socket event
+      socket.disconnect();
     };
   }, []);
 
