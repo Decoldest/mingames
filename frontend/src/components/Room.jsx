@@ -56,11 +56,11 @@ export default function Room() {
     return () => {
       socket.off("connect", handleConnect);
       socket.off("error", handleError);
-      socket.on("start-game", handleStartGame);
+      socket.off("start-game", handleStartGame);
       socket.off("disconnect", handleDisconnect);
 
       //send socket event
-      socket.disconnect();
+      socket.emit("leave-room");
     };
   }, []);
 
