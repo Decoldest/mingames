@@ -70,7 +70,9 @@ export default function Voting({
           <button
             onClick={() => {
               doneVotingPhase();
+              setIsDoneDrinking(true);
             }}
+            disabled={isDoneDrinking}
           >
             Done Drinking
           </button>
@@ -86,9 +88,7 @@ export default function Voting({
                   <button
                     onClick={() => {
                       addDrink(name);
-                      setIsDoneDrinking(true);
                     }}
-                    disabled={isDoneDrinking}
                   >
                     Give Drink
                   </button>

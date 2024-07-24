@@ -164,6 +164,7 @@ export default function GameMain({ isPartyLeader, state, setState }) {
             waitingMessage={waitingMessage}
             setWaitingMessage={handleWaitingMessage}
             changeGameData={handleChangeGameData}
+            isPartyLeader={isPartyLeader}
           />
         )
       ) : (

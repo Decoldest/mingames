@@ -46,7 +46,7 @@ export default function HotPotato({ roomID, gameData, changeGameData }) {
   return (
     <>
       <div>{timer}</div>
-      <div>
+      <div className="flex flex-row">
         {Object.entries(gameData).map(([player, potato], i) =>
           player.localeCompare(username) === 0 ? (
             <div key={i}>

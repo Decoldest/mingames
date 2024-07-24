@@ -77,14 +77,6 @@ export default function Room() {
         setError(response.message);
       }
     });
-
-    socket.on("joining-room", () => {
-      setError(null);
-      setState((prevState) => ({
-        ...prevState,
-        waiting: true,
-      }));
-    });
   };
 
   const errorHandler = (error) => {

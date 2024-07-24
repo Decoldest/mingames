@@ -7,17 +7,26 @@ ButtonPress.propTypes = {
   gameData: PropTypes.object,
   roomID: PropTypes.string,
   changeGameData: PropTypes.func,
+  isPartyLeader: PropTypes.bool,
 };
 
-export default function ButtonPress({ roomID, gameData, changeGameData }) {
+export default function ButtonPress({
+  roomID,
+  gameData,
+  changeGameData,
+  isPartyLeader,
+}) {
   const [timer, setTimer] = useState("");
-  const [score, setScore] = useState(0);
+  const [myScore, setMyScore] = useState(0);
   const [disabled, setDisabled] = useState(false);
   const { username } = useContext(UserContext);
 
   const pressedButton = () => {
-    setScore((score) => score + 1);
-    socket.emit("pressed-button", roomID, username, score);
+    setMyScore((myScore) => {
+      const newScore = myScore + 1;
+      socket.emit("pressed-button", roomID, username, newScore);
+      return newScore;
+    });
   };
 
   useEffect(() => {
@@ -27,6 +36,9 @@ export default function ButtonPress({ roomID, gameData, changeGameData }) {
 
     const disableGame = () => {
       setDisabled(true);
+      if (isPartyLeader) {
+        socket.emit("button-results", gameData, roomID);
+      }
     };
 
     const addScore = (newScore) => {
@@ -50,14 +62,19 @@ export default function ButtonPress({ roomID, gameData, changeGameData }) {
   return (
     <>
       <div>{timer}</div>
-      {Object.entries(gameData).map(([player, score], i) => (
-        <div key={i}>
-          <h1>{player}</h1>
-          <p>{score}</p>
-        </div>
-      ))}
+      <div className="flex flex-row">
+        {Object.entries(gameData).map(([player, score], i) => (
+          <div key={i}>
+            <h1>{player}</h1>
+            <p>{score}</p>
+          </div>
+        ))}
+      </div>
       <div>
-        <button onClick={() => pressedButton()}>Click Me</button>
+        <h1>{myScore}</h1>
+        <button disabled={disabled} onClick={() => pressedButton()}>
+          Click Me
+        </button>
       </div>
     </>
   );
