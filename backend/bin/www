@@ -60,7 +60,10 @@ const {
   triviaAnswered,
 } = require("../utils/triviaSocket");
 
-const { handleAfterVotingDone } = require("../utils/gameSocket");
+const {
+  handleAfterVotingDone,
+  handlePlayerJoiningLate,
+} = require("../utils/gameSocket");
 
 const { giveDrink } = require("../utils/votingSocket");
 
@@ -163,8 +166,16 @@ io.on("connection", (socket) => {
         // Join socket room
         socket.join(roomID);
 
-        //Change frontend state to match database and send message
-        callback({ success: true, state: updatedRoom.state });
+        const updatedData = await handlePlayerJoiningLate(
+          updatedRoom,
+          username,
+        );
+        console.log(updatedData);
+
+        //Change frontend state to match database
+        callback({ success: true, state: updatedData.state });
+
+        io.to(roomID).emit("late-player-data", updatedData.addedData);
 
         process.nextTick(() => {
           io.to(roomID).emit("joined-room", username);
@@ -241,6 +252,8 @@ io.on("connection", (socket) => {
 
   socket.on("place-wager", async (roomID, wager) => {
     try {
+      console.log(socket);
+      console.log(socket.id);
       const player = await Player.findOneAndUpdate(
         {
           socketID: socket.id,

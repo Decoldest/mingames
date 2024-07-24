@@ -59,6 +59,7 @@ const handleButtonResults = async (results, io, roomID) => {
 
   const drinkData = players.reduce((acc, player) => {
     const { username, wager } = player;
+    //Handle ties
     const isWinner = results[username] === maxValue;
     acc[username] = {
       drinksToGive: isWinner ? Number(wager) : 0,

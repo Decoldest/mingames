@@ -39,10 +39,11 @@ const handleAfterVotingDone = async (socket, io, roomID) => {
 
   //Check if all ready and set next question state if truthy
   const allPlayersReady = room.players.every((player) => player.wager === 0);
+  const { selectedGame } = room.state;
 
   if (allPlayersReady) {
     console.log("All players are done drinking");
-    switch (room.state.selectedGame) {
+    switch (selectedGame) {
       case "Trivia":
         await setNextTriviaQuestion(room, continueGame, endGame);
         break;
@@ -60,10 +61,26 @@ const handleAfterVotingDone = async (socket, io, roomID) => {
   }
 };
 
-const handlePlayerJoiningLate = () => {
-  
-}
+const handlePlayerJoiningLate = async (room, username) => {
+  const { selectedGame, gameData } = room.state;
+  let addedData;
+
+  if (selectedGame === "Hot Potato") {
+    addedData = { [username]: { hasPotato: false } };
+  } else if (selectedGame === "Button Press") {
+    addedData = { [username]: 0 };
+  }
+
+  room.state.gameData = {
+    ...gameData,
+    ...addedData,
+  };
+
+  await room.save();
+  return { state: room.state, addedData };
+};
 
 module.exports = {
   handleAfterVotingDone,
+  handlePlayerJoiningLate,
 };
