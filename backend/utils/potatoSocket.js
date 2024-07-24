@@ -76,7 +76,6 @@ const endHotPotato = async (io, roomID) => {
 
 const updateWinnersAndLoser = (results, room, io, roomID) => {
   const drinkData = {};
-  console.log(results);
 
   room.players.forEach(async (player) => {
     // Update drink data - winner has drinks to give, loser drinks their wager

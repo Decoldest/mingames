@@ -85,10 +85,13 @@ const handleRaceWinnerVoting = (io, roomID, votingData) => {
 
 const handlePotatoWinnerVoting = handleRaceWinnerVoting;
 
+const handleButtonPressVoting = handleRaceWinnerVoting;
+
 module.exports = {
   setVotingData,
   giveDrink,
   handleStartVoting,
   handleRaceWinnerVoting,
   handlePotatoWinnerVoting,
+  handleButtonPressVoting,
 };

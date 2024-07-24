@@ -152,7 +152,7 @@ const updateWinnerAndLosers = async (trainer, roomID, io) => {
 
   const drinkData = {};
 
-  room.players.forEach(async (player) => {
+  room.players.forEach((player) => {
     // Update drink data - winner has drinks to give, losers drink their wager
     if (player.username === trainer) {
       drinkData[player.username] = {

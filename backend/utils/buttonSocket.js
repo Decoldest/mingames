@@ -1,4 +1,8 @@
 const Room = require("../models/room");
+const MAX_TIMER = 600;
+const TIMER_INTERVAL = 100;
+
+const { handleButtonPressVoting } = require("./votingSocket");
 
 const sendButtonsAndStartTimer = async (io, roomID, room) => {
   const { players } = room;
@@ -10,7 +14,7 @@ const sendButtonsAndStartTimer = async (io, roomID, room) => {
 
   io.to(roomID).emit("game-data", gameData);
 
-  // startTimer(io, roomID);
+  startTimer(io, roomID);
 };
 
 const setButtonValues = (players) => {
@@ -24,9 +28,50 @@ const updateScore = (io, roomID, username, score) => {
   const newScore = {
     [username]: score,
   };
-  console.log(newScore);
 
   io.to(roomID).emit("add-score", newScore);
 };
 
-module.exports = { sendButtonsAndStartTimer, updateScore };
+// Start for game and emit time
+const startTimer = (io, roomID) => {
+  let timer = MAX_TIMER;
+
+  // Set interval to emit timer
+  const timerID = setInterval(() => {
+    io.to(roomID).emit("timer", (timer / 10).toFixed(1));
+    timer--;
+    if (timer <= 0) {
+      clearInterval(timerID);
+      endButtonGame(io, roomID);
+    }
+  }, TIMER_INTERVAL);
+};
+
+const endButtonGame = (io, roomID) => {
+  io.to(roomID).emit("end-game");
+};
+
+const handleButtonResults = async (results, io, roomID) => {
+  const room = await Room.findOne({ code: roomID }).populate("players");
+  const { players } = room;
+
+  const maxValue = Math.max(...Object.values(results));
+
+  const drinkData = players.reduce((acc, player) => {
+    const { username, wager } = player;
+    const isWinner = results[username] === maxValue;
+    acc[username] = {
+      drinksToGive: isWinner ? Number(wager) : 0,
+      myDrinks: isWinner ? 0 : Number(wager),
+      won: isWinner,
+      message: isWinner
+        ? "You must have some practice."
+        : "Just click faster bro.",
+    };
+    return acc;
+  }, {});
+
+  handleButtonPressVoting(io, roomID, drinkData);
+};
+
+module.exports = { sendButtonsAndStartTimer, updateScore, handleButtonResults };

@@ -2,7 +2,6 @@ const Room = require("../models/room");
 const Player = require("../models/player");
 const { setNextTriviaQuestion } = require("./triviaSocket");
 
-
 const handleAfterVotingDone = async (socket, io, roomID) => {
   //Send updated state to continue current game
   const continueGame = (state) => {
@@ -54,9 +53,16 @@ const handleAfterVotingDone = async (socket, io, roomID) => {
       case "Hot Potato":
         endGame();
         break;
+      case "Button Press":
+        endGame();
+        break;
     }
   }
 };
+
+const handlePlayerJoiningLate = () => {
+  
+}
 
 module.exports = {
   handleAfterVotingDone,

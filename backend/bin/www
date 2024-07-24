@@ -74,6 +74,7 @@ const {
 const {
   sendButtonsAndStartTimer,
   updateScore,
+  handleButtonResults,
 } = require("../utils/buttonSocket");
 
 /**
@@ -302,15 +303,17 @@ io.on("connection", (socket) => {
   });
 
   socket.on("give-potato", async (roomID, username, receiver) => {
-    console.log(receiver);
-    console.log(username);
     giveHotPotato(io, roomID, username, receiver);
   });
 
   socket.on("pressed-button", (roomID, username, score) => {
     updateScore(io, roomID, username, score);
   });
-  
+
+  socket.on("button-results", (gameData, roomID) => {
+    handleButtonResults(gameData, io, roomID);
+  });
+
   // Find room player is disconnecting from and remove player
   socket.on("disconnect", async () => {
     try {
