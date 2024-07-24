@@ -252,8 +252,9 @@ io.on("connection", (socket) => {
 
   socket.on("place-wager", async (roomID, wager) => {
     try {
-      console.log(socket);
       console.log(socket.id);
+      console.log("wager", wager);
+
       const player = await Player.findOneAndUpdate(
         {
           socketID: socket.id,
@@ -303,10 +304,12 @@ io.on("connection", (socket) => {
     giveDrink(io, roomID, username, name);
   });
 
+  //Uses current game selection to decide what event to emit
   socket.on("done-voting-phase", async (roomID) => {
     handleAfterVotingDone(socket, io, roomID);
   });
 
+  //Adds squirtle to gameData
   socket.on("add-squirtle", async (squirtle, username, roomID, callback) => {
     addRacerSquirtle(socket, io, squirtle, username, roomID, callback);
   });
@@ -327,45 +330,54 @@ io.on("connection", (socket) => {
     handleButtonResults(gameData, io, roomID);
   });
 
+  //Will leave room if navigated backwards
+  socket.on("leave-room", async () => {
+    handlePlayerLeaving(io, socket);
+  });
+
   // Find room player is disconnecting from and remove player
   socket.on("disconnect", async () => {
-    try {
-      const disconnectedPlayer = await Player.findOne({
-        socketID: socket.id,
-      });
-
-      if (!disconnectedPlayer) {
-        return;
-      }
-
-      const room = await Room.findOne({ players: disconnectedPlayer._id });
-
-      //Delete player then remove that player from the room
-      await Player.findByIdAndDelete(disconnectedPlayer._id);
-
-      const updatedRoom = await Room.findByIdAndUpdate(
-        room._id,
-        {
-          $pull: { players: disconnectedPlayer._id },
-        },
-        { new: true },
-      );
-
-      io.to(room.code).emit("left-room", disconnectedPlayer.username);
-
-      //Delete room if no players
-      if (updatedRoom.players.length === 0) {
-        await Room.findByIdAndDelete(room._id);
-        console.log(
-          `Room ${room._id} deleted because there are no players left.`,
-        );
-        io.to(room.code).emit("return-main");
-      }
-    } catch (error) {
-      console.error("Error handling disconnect: ", error);
-    }
+    handlePlayerLeaving(io, socket);
   });
 });
+
+const handlePlayerLeaving = async (io, socket) => {
+  try {
+    const disconnectedPlayer = await Player.findOne({
+      socketID: socket.id,
+    });
+
+    if (!disconnectedPlayer) {
+      return;
+    }
+
+    const room = await Room.findOne({ players: disconnectedPlayer._id });
+
+    //Delete player then remove that player from the room
+    await Player.findByIdAndDelete(disconnectedPlayer._id);
+
+    const updatedRoom = await Room.findByIdAndUpdate(
+      room._id,
+      {
+        $pull: { players: disconnectedPlayer._id },
+      },
+      { new: true },
+    );
+
+    io.to(room.code).emit("left-room", disconnectedPlayer.username);
+
+    //Delete room if no players
+    if (updatedRoom.players.length === 0) {
+      await Room.findByIdAndDelete(room._id);
+      console.log(
+        `Room ${room._id} deleted because there are no players left.`,
+      );
+      io.to(room.code).emit("return-main");
+    }
+  } catch (error) {
+    console.error("Error handling disconnect: ", error);
+  }
+};
 
 function prepareGameData(io, roomID, room, game) {
   if (game === "Trivia") {
