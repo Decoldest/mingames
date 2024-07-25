@@ -1,0 +1,67 @@
+
+@tailwind components;
+@tailwind utilities;
+
+$main-background-colour: #EE9C39;
+$main-button-colour:#422800;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.squirtle-sprite{
+  image-rendering: pixelated;
+}
+
+.squirtle-animated{ 
+  position: relative;
+  width: 100px; 
+  height: 100px;
+}
+
+main {
+  background-color: $main-background-colour;
+}
+
+.main-button {
+  background-color: #fbeee0;
+  border: 2px solid $main-button-colour;
+  border-radius: 30px;
+  box-shadow: $main-button-colour 4px 4px 0 0;
+  color: $main-button-colour;
+  cursor: pointer;
+  display: inline-block;
+  font-weight: 600;
+  font-size: 18px;
+  padding: 0 18px;
+  line-height: 50px;
+  text-align: center;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.main-button:hover {
+  background-color: #fff;
+}
+
+.main-button:active {
+  box-shadow: $main-button-colour 2px 2px 0 0;
+  transform: translate(2px, 2px);
+}
+
+@media (min-width: 768px) {
+  .main-button {
+    min-width: 120px;
+    padding: 0 25px;
+  }
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
