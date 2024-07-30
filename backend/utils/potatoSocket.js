@@ -4,7 +4,7 @@ const { handlePotatoWinnerVoting } = require("./votingSocket");
 const MAX_TIMER = 600;
 const TIMER_INTERVAL = 100;
 
-const sendPlayersAndStartTimer = async (io, roomID, room) => {
+const sendPlayers = async (io, roomID, room) => {
   const { players } = room;
   const gameData = giveRandomPersonPotato(players);
 
@@ -12,8 +12,6 @@ const sendPlayersAndStartTimer = async (io, roomID, room) => {
   await room.save();
 
   io.to(roomID).emit("game-data", gameData);
-
-  startTimer(io, roomID);
 };
 
 //Create a new array with the player usernames and assign a random potato
@@ -48,7 +46,7 @@ const giveHotPotato = async (io, roomID, giver, receiver) => {
 };
 
 // Start for game and emit time
-const startTimer = (io, roomID) => {
+const startPotatoTimer = (io, roomID) => {
   let timer = MAX_TIMER;
 
   // Set interval to emit timer
@@ -98,4 +96,4 @@ const updateWinnersAndLoser = (results, room, io, roomID) => {
   handlePotatoWinnerVoting(io, roomID, drinkData);
 };
 
-module.exports = { sendPlayersAndStartTimer, giveHotPotato };
+module.exports = { sendPlayers, giveHotPotato, startPotatoTimer };

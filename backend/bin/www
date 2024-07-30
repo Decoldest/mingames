@@ -70,14 +70,16 @@ const { giveDrink } = require("../utils/votingSocket");
 const { addRacerSquirtle, squirtleWon } = require("../utils/raceSocket");
 
 const {
-  sendPlayersAndStartTimer,
+  sendPlayers,
   giveHotPotato,
+  startPotatoTimer,
 } = require("../utils/potatoSocket");
 
 const {
-  sendButtonsAndStartTimer,
+  sendButtons,
   updateScore,
   handleButtonResults,
+  startButtonTimer,
 } = require("../utils/buttonSocket");
 
 /**
@@ -117,7 +119,12 @@ io.on("connection", (socket) => {
       //Join socket room and send message
       socket.join(roomID);
       callback({ success: true, roomID });
-      io.to(roomID).emit("joined-room", username);
+
+      //Send joined message
+      process.nextTick(() => {
+        io.to(roomID).emit("joined-room", username);
+      });
+
       console.log(`Room ${roomID} created with player ${username}`);
     } catch (err) {
       console.error("Error creating room: ", err);
@@ -170,7 +177,6 @@ io.on("connection", (socket) => {
           updatedRoom,
           username,
         );
-        console.log(updatedData);
 
         //Change frontend state to match database
         callback({ success: true, state: updatedData.state });
@@ -252,9 +258,6 @@ io.on("connection", (socket) => {
 
   socket.on("place-wager", async (roomID, wager) => {
     try {
-      console.log(socket.id);
-      console.log("wager", wager);
-
       const player = await Player.findOneAndUpdate(
         {
           socketID: socket.id,
@@ -289,6 +292,7 @@ io.on("connection", (socket) => {
           { $set: { "state.isWagering": false } },
         );
         io.to(roomID).emit("all-wagers-placed");
+        handleTimer(io, roomID, room.state.selectedGame);
       }
     } catch (error) {
       console.error("Error handling wager: ", error);
@@ -383,9 +387,19 @@ function prepareGameData(io, roomID, room, game) {
   if (game === "Trivia") {
     sendTriviaQuestions(io, roomID);
   } else if (game === "Hot Potato") {
-    sendPlayersAndStartTimer(io, roomID, room);
+    sendPlayers(io, roomID, room);
   } else if (game == "Button Press") {
-    sendButtonsAndStartTimer(io, roomID, room);
+    sendButtons(io, roomID, room);
+  }
+}
+
+function handleTimer(io, roomID, game) {
+  if (game === "Hot Potato") {
+    startPotatoTimer(io, roomID);
+  } else if (game == "Button Press") {
+    startButtonTimer(io, roomID);
+  } else {
+    return;
   }
 }
 

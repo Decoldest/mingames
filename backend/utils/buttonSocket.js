@@ -4,7 +4,7 @@ const TIMER_INTERVAL = 100;
 
 const { handleButtonPressVoting } = require("./votingSocket");
 
-const sendButtonsAndStartTimer = async (io, roomID, room) => {
+const sendButtons = async (io, roomID, room) => {
   const { players } = room;
 
   const gameData = setButtonValues(players);
@@ -13,8 +13,6 @@ const sendButtonsAndStartTimer = async (io, roomID, room) => {
   await room.save();
 
   io.to(roomID).emit("game-data", gameData);
-
-  startTimer(io, roomID);
 };
 
 const setButtonValues = (players) => {
@@ -33,7 +31,7 @@ const updateScore = (io, roomID, username, score) => {
 };
 
 // Start for game and emit time
-const startTimer = (io, roomID) => {
+const startButtonTimer = (io, roomID) => {
   let timer = MAX_TIMER;
 
   // Set interval to emit timer
@@ -75,4 +73,4 @@ const handleButtonResults = async (results, io, roomID) => {
   handleButtonPressVoting(io, roomID, drinkData);
 };
 
-module.exports = { sendButtonsAndStartTimer, updateScore, handleButtonResults };
+module.exports = { sendButtons, updateScore, handleButtonResults, startButtonTimer };
