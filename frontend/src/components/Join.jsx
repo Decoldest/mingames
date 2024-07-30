@@ -4,6 +4,7 @@ import "./Join.scss";
 import back from "../assets/back.svg";
 
 Join.propTypes = {
+  creatingRoom: PropTypes.bool,
   handleCreateRoom: PropTypes.func,
   handleJoinRoom: PropTypes.func,
   error: PropTypes.string,
@@ -15,6 +16,7 @@ Join.propTypes = {
 };
 
 export default function Join({
+  creatingRoom,
   handleCreateRoom,
   handleJoinRoom,
   error,
@@ -52,7 +54,18 @@ export default function Join({
     <section className="join flex flex-col items-center justify-start">
       <h1 className="title">Booze Bash</h1>
       <p>{`I hope you're thirsty`}</p>
-      {view === "landing" ? (
+      {!creatingRoom ? (
+        <div className="flex flex-col gap-6 md:gap-16 w-full ">
+          <NameTag
+            username={username}
+            usernameHandler={usernameHandler}
+            errorHandler={errorHandler}
+          />
+          <button onClick={handleJoinRoom} className="w-full main-button">
+            Join Room
+          </button>
+        </div>
+      ) : view === "landing" ? (
         <div className="flex flex-col items-center sm:flex-row gap-6 md:gap-16 w-full">
           <button
             onClick={() => {
@@ -85,21 +98,11 @@ export default function Join({
             <img src={back} alt="Left Arrow" className="w-4" />
             Back
           </button>
-          <div className="tag self-center">
-            <h2>HELLO</h2>
-            <p>my name is</p>
-            <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => {
-                usernameHandler(e.target.value);
-                errorHandler(null);
-              }}
-              placeholder="Enter your name"
-              className="w-full"
-            />
-          </div>
+          <NameTag
+            username={username}
+            usernameHandler={usernameHandler}
+            errorHandler={errorHandler}
+          />
           {view === "create" ? (
             <button
               onClick={handleCreateRoom}
@@ -126,7 +129,34 @@ export default function Join({
           )}
         </div>
       )}
+
       {error && <div className="error">{error}</div>}
     </section>
+  );
+}
+
+NameTag.propTypes = {
+  username: PropTypes.string,
+  usernameHandler: PropTypes.func,
+  errorHandler: PropTypes.func,
+};
+
+function NameTag({ username, usernameHandler, errorHandler }) {
+  return (
+    <div className="tag self-center">
+      <h2>HELLO</h2>
+      <p>my name is</p>
+      <input
+        id="username"
+        type="text"
+        value={username}
+        onChange={(e) => {
+          usernameHandler(e.target.value);
+          errorHandler(null);
+        }}
+        placeholder="Enter your name"
+        className="w-full"
+      />
+    </div>
   );
 }

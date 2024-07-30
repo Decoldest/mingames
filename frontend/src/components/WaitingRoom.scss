@@ -1,6 +1,6 @@
 $wait-backround-colour: #FFEEBD;
 $wait-input-border: #DE7339;
-$wait-button-colour: rgb(113, 113, 246);
+$send-button-colour: rgb(124, 182, 86);
 $input-container-colour: rgb(249, 245, 245);
 
 
@@ -14,19 +14,12 @@ $input-container-colour: rgb(249, 245, 245);
     font-size: 1.5rem;
   }
 
-  .info-container {
-    flex-grow: 1;
-    flex-shrink: 3;
-  }
-
   .input-container {
     padding: 1rem;
     display: flex;
     flex-direction: column;
     background-color: $input-container-colour;
     border-radius: 10px;
-    flex-grow: 2;
-    flex-shrink: 1;
 
     .message-container {
       display: flex;
@@ -38,6 +31,10 @@ $input-container-colour: rgb(249, 245, 245);
       border-radius: 5px;
       padding: 0.5rem;
       margin-bottom: 5px;
+      width: 450px;
+      @media (max-width: 600px) {
+        width: 300px;
+      }
 
       .message-item {
         margin: 0.5rem 0;
@@ -59,14 +56,15 @@ $input-container-colour: rgb(249, 245, 245);
       padding: 0.5rem 1rem;
       font-size: 1rem;
       color: #fff;
-      background-color: $wait-button-colour;
+      background-color: $send-button-colour
+    ;
       border: none;
       border-radius: 5px;
       cursor: pointer;
       margin-top: 0.5rem;
 
       &:hover {
-        background-color: $wait-button-colour;
+        background-color: $send-button-colour;
       }
     }
   }

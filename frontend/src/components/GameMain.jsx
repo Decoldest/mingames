@@ -8,6 +8,8 @@ import Voting from "./Voting";
 import HotPotato from "./games/HotPotato";
 import { socket } from "../socket";
 import ButtonPress from "./games/ButtonPress";
+import "./GameMain.scss";
+
 
 GameMain.propTypes = {
   isPartyLeader: PropTypes.bool,
@@ -21,28 +23,33 @@ export default function GameMain({ isPartyLeader, state, setState }) {
   const { isWagering, selectedGame, gameData, votingData, waitingMessage } =
     state;
 
-  const games = {
-    Trivia: {
-      component: Trivia,
-      description: `Answer the trivia question correctly and you will get to hand out the amount of drinks you wager to other players.
-      If you guess incorrectly, you have to drink your wager. Players who answered correctly can also hand out drinks to you.`,
-    },
-    Race: {
-      component: Race,
-      description: `You will get a squirtle that will race the other players' squirtles. Wager a number of drinks 
-      on your squirtle winning the race. Winner gets to give drinks out. Losers will
-      drink their wager plus any additional drinks given to them.`,
-    },
-    "Hot Potato": {
-      component: HotPotato,
-      description: `It's literally hot potato. People who have a potato at the end of the game drink`,
-    },
-    "Button Press": {
-      component: ButtonPress,
-      description: `Press the button as many times as possible before the timer ends. The player with the most button presses
-      is safe. The other players drink.`,
-    },
-  };
+    const games = {
+      Trivia: {
+        component: Trivia,
+        description: `Answer the trivia question correctly and you will get to hand out the amount of drinks you wager to other players.
+        If you guess incorrectly, you have to drink your wager. Players who answered correctly can also hand out drinks to you.`,
+        emoji: "🧠",
+      },
+      Race: {
+        component: Race,
+        description: `You will get a squirtle that will race the other players' squirtles. Wager a number of drinks 
+        on your squirtle winning the race. Winner gets to give drinks out. Losers will
+        drink their wager plus any additional drinks given to them.`,
+        emoji: "🏁",
+      },
+      "Hot Potato": {
+        component: HotPotato,
+        description: `It's literally hot potato. People who have a potato at the end of the game drink`,
+        emoji: "🥔",
+      },
+      "Button Press": {
+        component: ButtonPress,
+        description: `Press the button as many times as possible before the timer ends. The player with the most button presses
+        is safe. The other players drink.`,
+        emoji: "🔘",
+      },
+    };
+    
 
   useEffect(() => {
     const handleStartWagers = () => {
@@ -148,7 +155,7 @@ export default function GameMain({ isPartyLeader, state, setState }) {
   };
 
   return (
-    <section>
+    <section className="w-full">
       {isWagering ? (
         <div>
           <h1>{selectedGame}</h1>
@@ -177,16 +184,20 @@ export default function GameMain({ isPartyLeader, state, setState }) {
           />
         )
       ) : (
-        <div>
-          {Object.keys(games).map((game) => (
-            <button
-              key={game}
-              onClick={() => handleGameSelectionAsLeader(game)}
-              disabled={!isPartyLeader}
-            >
-              {game}
-            </button>
-          ))}
+        <div className="game-buttons-container">
+          <h2>Choose A Game</h2>
+          <div className="game-buttons-grid">
+            {Object.keys(games).map((game) => (
+              <button
+                key={game}
+                onClick={() => handleGameSelectionAsLeader(game)}
+                disabled={!isPartyLeader}
+                className="game-button"
+              >
+                <span>{games[game].emoji} {game}</span>
+              </button>
+            ))}
+          </div>
           {!isPartyLeader && <h2>Party leader will select game.</h2>}
         </div>
       )}

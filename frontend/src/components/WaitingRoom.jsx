@@ -71,7 +71,7 @@ export default function WaitingRoom({ isPartyLeader }) {
   }, [messages]);
 
   return (
-    <section className="wait flex w-1/2 justify-center gap-10">
+    <section className="wait flex justify-center gap-10">
       <div className="info-container">
         <h1 className="title">Booze Bash</h1>
         <h1>{roomID}</h1>

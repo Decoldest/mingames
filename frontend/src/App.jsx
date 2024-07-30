@@ -2,6 +2,7 @@ import Homepage from "./components/Homepage";
 import Room from "./components/Room";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { UserProvider } from "./components/UserContext"
+import '@fontsource/caveat-brush';
 
 function App() {
   return (
