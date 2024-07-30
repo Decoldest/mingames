@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./Join.scss";
-import back from "../assets/back.svg"
+import back from "../assets/back.svg";
 
 Join.propTypes = {
   handleCreateRoom: PropTypes.func,
@@ -28,7 +28,25 @@ export default function Join({
 
   const handleBack = () => {
     setView("landing");
+    // Go back to landing
+    window.history.back();
   };
+
+  useEffect(() => {
+    const handlePopState = (event) => {
+      if (event.state && event.state.view) {
+        setView(event.state.view);
+      } else {
+        setView("landing");
+      }
+      console.log(window.history);
+    };
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
 
   return (
     <section className="join flex flex-col items-center justify-start">
@@ -37,13 +55,19 @@ export default function Join({
       {view === "landing" ? (
         <div className="flex flex-col items-center sm:flex-row gap-6 md:gap-16 w-full">
           <button
-            onClick={() => setView("create")}
+            onClick={() => {
+              setView("create");
+              window.history.pushState({ view: "create" }, "");
+            }}
             className="flex-grow main-button"
           >
             Create Party
           </button>
           <button
-            onClick={() => setView("join")}
+            onClick={() => {
+              setView("join");
+              window.history.pushState({ view: "join" }, "");
+            }}
             className="flex-grow main-button"
           >
             Join Party
@@ -58,10 +82,10 @@ export default function Join({
             }}
             className="back-button"
           >
-            <img src={back} alt="Left Arrow" className="w-4"/>
+            <img src={back} alt="Left Arrow" className="w-4" />
             Back
           </button>
-          <div className="tag w-full">
+          <div className="tag self-center">
             <h2>HELLO</h2>
             <p>my name is</p>
             <input
@@ -77,26 +101,27 @@ export default function Join({
             />
           </div>
           {view === "create" ? (
-            <button onClick={handleCreateRoom} className="w-full main-button self-center">
+            <button
+              onClick={handleCreateRoom}
+              className="w-full main-button self-center"
+            >
               Create Room
             </button>
           ) : (
-            <div className="flex flex-col w-full md:flex-row gap-4 md:gap-20">
-              <div className="flex-grow md:w-1/2">
-                <input
-                  type="text"
-                  value={roomID}
-                  onChange={(e) => {
-                    roomHandler(e.target.value);
-                    errorHandler(null);
-                  }}
-                  placeholder="Enter Room Code"
-                  className="flex-grow"
-                />
-                <button onClick={handleJoinRoom} className="w-full main-button">
-                  Join Room
-                </button>
-              </div>
+            <div className="flex flex-col w-full md:flex-row gap-4 items-center">
+              <input
+                type="text"
+                value={roomID}
+                onChange={(e) => {
+                  roomHandler(e.target.value);
+                  errorHandler(null);
+                }}
+                placeholder="Enter Room Code"
+                className="flex-grow room-code"
+              />
+              <button onClick={handleJoinRoom} className="w-full main-button">
+                Join Room
+              </button>
             </div>
           )}
         </div>
