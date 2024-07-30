@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import UserContext from "./UserContext";
 import { socket } from "../socket";
 import { useNavigate } from "react-router-dom";
+import "./WaitingRoom.scss";
 
 WaitingRoom.propTypes = {
   isPartyLeader: PropTypes.bool,
@@ -35,13 +36,11 @@ export default function WaitingRoom({ isPartyLeader }) {
     };
 
     const returnToHome = () => {
-      console.log("returning ti gome");
       navigate("/");
     };
 
     socket.on("joined-room", handleJoinedRoom);
     socket.on("left-room", handleLeftRoom);
-    socket.on("receive-message", handleReceiveMessage);
     socket.on("receive-message", handleReceiveMessage);
     socket.on("return-main", returnToHome);
 
@@ -64,32 +63,48 @@ export default function WaitingRoom({ isPartyLeader }) {
     socket.emit("initiate-game", roomID);
   };
 
+  useEffect(() => {
+    if (messageContainerRef.current) {
+      messageContainerRef.current.scrollTop =
+        messageContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   return (
-    <section>
-      <h1>Minigames.io</h1>
-      <h1>{roomID}</h1>
-      Waiting for players to join...
-      <div className="message-container" ref={messageContainerRef}>
-        {messages.map((msg, index) => (
-          <div key={index} className="message-item">
-            {msg}
-          </div>
-        ))}
+    <section className="wait flex w-1/2 justify-center gap-10">
+      <div className="info-container">
+        <h1 className="title">Booze Bash</h1>
+        <h1>{roomID}</h1>
+        <p className="mb-4">Waiting for players to join...</p>
+        {isPartyLeader ? (
+          <button onClick={() => setGameStart()} className="main-button">
+            Start Game
+          </button>
+        ) : (
+          <h4>Party leader will start the game</h4>
+        )}
       </div>
-      {isPartyLeader ? (
-        <button onClick={() => setGameStart()}>Start Game</button>
-      ) : (
-        <h4>Party leader will start the game</h4>
-      )}
       <div className="input-container">
+        <div className="message-container" ref={messageContainerRef}>
+          {messages.map((msg, index) => (
+            <div key={index} className="message-item">
+              {msg}
+            </div>
+          ))}
+        </div>
         <input
           type="text"
           value={messageInput}
           onChange={(e) => setMessageInput(e.target.value)}
-          placeholder="Type your message..."
+          placeholder="Type a message..."
           className="message-input"
         />
-        <button onClick={() => sendMessage()} className="send-button">
+        <button
+          onClick={() => {
+            sendMessage();
+          }}
+          className="send-button"
+        >
           Send
         </button>
       </div>

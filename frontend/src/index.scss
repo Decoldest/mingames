@@ -2,13 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-$main-background-colour: #EE9C39;
-$main-button-colour:#422800;
+$main-background-colour: #2B59C3;
+$main-button-shadow:#253C78;
+$main-text-colour: rgb(238, 238, 238);
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+h1, h2, h3, h4, h5, h6, h7, p {
+  color: $main-text-colour;
 }
 
 .squirtle-sprite{
@@ -21,42 +26,72 @@ $main-button-colour:#422800;
   height: 100px;
 }
 
+ul, li {
+  list-style-type: none;
+  line-height: 2.5rem;
+}
+
+li {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 main {
   background-color: $main-background-colour;
 }
 
 .main-button {
-  background-color: #fbeee0;
-  border: 2px solid $main-button-colour;
-  border-radius: 30px;
-  box-shadow: $main-button-colour 4px 4px 0 0;
-  color: $main-button-colour;
+  background-color: #FFEECF;
+  border: 2px solid $main-button-shadow;
+  border-radius: 50px;
+  box-shadow: $main-button-shadow 4px 4px 0 0;
+  color: $main-button-shadow;
   cursor: pointer;
   display: inline-block;
   font-weight: 600;
   font-size: 18px;
-  padding: 0 18px;
+  padding: 5px 20px;
   line-height: 50px;
   text-align: center;
   text-decoration: none;
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
+  width: 200px;
+
+  &:hover {
+    background-color: #fff;
+    scale: 105%;
+  }
+
+  &:active {
+    box-shadow: $main-button-shadow 2px 2px 0 0;
+    transform: translate(2px, 2px);
+  }
 }
 
-.main-button:hover {
-  background-color: #fff;
-}
+.back-button {
+  color: white;
+  cursor: pointer;
+  font-size: 18px;
+  width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px;
+  border: solid white 2px;
+  background: none;
+  border-radius: 10px;
+  transition: transform 0.3s ease;
 
-.main-button:active {
-  box-shadow: $main-button-colour 2px 2px 0 0;
-  transform: translate(2px, 2px);
-}
+  &:hover {
+    transform: scale(1.05) rotate(5deg);
+  }
 
-@media (min-width: 768px) {
-  .main-button {
-    min-width: 120px;
-    padding: 0 25px;
+  &:active {
+    transform: translate(2px, 2px);
   }
 }
 
@@ -64,4 +99,13 @@ canvas {
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+.how-to-play {
+  outline: solid #D36582 2.5px;
+  color: #213364;
+
+  @media (max-width: 650px) {
+    font-size: 0.875rem;
+  }
 }

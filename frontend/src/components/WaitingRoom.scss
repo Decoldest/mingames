@@ -1,0 +1,80 @@
+$wait-backround-colour: #FFEEBD;
+$wait-input-border: #DE7339;
+$wait-button-colour: rgb(113, 113, 246);
+$input-container-colour: rgb(249, 245, 245);
+
+
+.wait {
+  padding: 2rem;
+  border-radius: 10px;
+  flex-direction: column;
+
+  h1 {
+    margin: 0.5rem 0;
+    font-size: 1.5rem;
+  }
+
+  .info-container {
+    flex-grow: 1;
+    flex-shrink: 3;
+  }
+
+  .input-container {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    background-color: $input-container-colour;
+    border-radius: 10px;
+    flex-grow: 2;
+    flex-shrink: 1;
+
+    .message-container {
+      display: flex;
+      flex-direction: column;
+      height: 200px;
+      overflow-y: auto;
+      background-color: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 5px;
+      padding: 0.5rem;
+      margin-bottom: 5px;
+
+      .message-item {
+        margin: 0.5rem 0;
+      }
+    }
+    .message-input {
+      border: 1px solid rgb(178, 178, 178);
+      border-radius: 30px;
+      padding: 5px 20px;
+  
+      &:focus {
+        border-color: #F6BD5A;
+        outline: none;
+        box-shadow: 0 0 5px rgba(246, 189, 90, 0.6);
+      }
+    }
+
+    .send-button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      color: #fff;
+      background-color: $wait-button-colour;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+
+      &:hover {
+        background-color: $wait-button-colour;
+      }
+    }
+  }
+}
+
+@media (min-width: 950px) {
+  .wait {
+    flex-direction: row;
+  }
+}
+

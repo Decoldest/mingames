@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Join from "./Join";
 import UserContext from "./UserContext";
 import { socket } from "../socket";
+import HowToPlay from "./HowToPlay";
 
 export default function Homepage() {
   const [roomID, setRoomID] = useState("");
@@ -92,7 +93,7 @@ export default function Homepage() {
   }
 
   return (
-    <main className="font-sans min-h-screen flex items-start justify-center pt-20">
+    <main className="font-sans min-h-screen flex flex-col items-center justify-center gap-6 sm:gap-10">
       <Join
         creatingRoom={true}
         handleCreateRoom={handleCreateRoom}
@@ -104,6 +105,7 @@ export default function Homepage() {
         roomID={roomID}
         roomHandler={roomHandler}
       />
+      <HowToPlay/>
     </main>
   );
 }
