@@ -67,7 +67,7 @@ const endHotPotato = async (io, roomID) => {
   const room = await Room.findOne({ code: roomID }).populate("players");
 
   if (!room) return;
-  
+
   const results = room.state.gameData;
   updateWinnersAndLoser(results, room, io, roomID);
 };
@@ -79,17 +79,17 @@ const updateWinnersAndLoser = (results, room, io, roomID) => {
     // Update drink data - winner has drinks to give, loser drinks their wager
     if (results[player.username].hasPotato) {
       drinkData[player.username] = {
-        drinksToGive: Number(player.wager),
-        myDrinks: 0,
-        won: true,
-        message: "You didn't get burned by the potato.",
-      };
-    } else {
-      drinkData[player.username] = {
         drinksToGive: 0,
         myDrinks: Number(player.wager),
         won: false,
         message: "You got scorched by the potato",
+      };
+    } else {
+      drinkData[player.username] = {
+        drinksToGive: Number(player.wager),
+        myDrinks: 0,
+        won: true,
+        message: "You didn't get burned by the potato.",
       };
     }
   });
