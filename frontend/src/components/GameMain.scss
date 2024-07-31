@@ -1,43 +1,252 @@
+$light-colour: rgb(238, 238, 238);
+$game-background-colour:#253C78;
+
 .game-buttons-container {
-  margin: 4rem;
+  margin: 2rem 4rem;
+
+  @media (min-width: 800px) {
+    margin: 5% 10%;
+  }
+
+  h2 {
+    font-size: 3rem;
+  }
 }
 
 .game-buttons-grid {
   display: grid;
   gap: 10px;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  padding: 2rem;
+  @media (max-width: 700px) {
+   padding: 0;
+   margin-top: 1rem;
+  }
 }
 
 .game-button {
   align-items: center;
-  background-image: linear-gradient(135deg, #f34079 40%, #fc894d);
-  border: 0;
-  border-radius: 10px;
+  appearance: none;
+  background-color: #fff;
+  border-radius: 24px;
+  border-style: none;
+  box-shadow: rgba(0, 0, 0, .2) 0 3px 5px -1px,rgba(0, 0, 0, .14) 0 6px 10px 0,rgba(0, 0, 0, .12) 0 1px 18px 0;
   box-sizing: border-box;
-  color: #fff;
+  color: #3c4043;
   cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  font-size: 16px;
-  height: 54px;
+  display: inline-flex;
+  fill: currentcolor;
+  font-size: 1.2rem;
+  height: 48px;
   justify-content: center;
-  letter-spacing: .4px;
+  letter-spacing: 1px;
   max-width: 100%;
-  padding: 20px 30px;
-  text-decoration: none;
+  overflow: visible;
+  padding: 20px 24px;
+  position: relative;
+  text-align: center;
+  text-transform: none;
+  transition: box-shadow 280ms cubic-bezier(.4, 0, .2, 1),opacity 15ms linear 30ms,transform 270ms cubic-bezier(0, 0, .2, 1) 0ms;
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
+  width: auto;
+  will-change: transform,opacity;
+  z-index: 10;
 
-  &:hover {
-    transform: scale(1.05) rotate(-5deg);
+  span {
+    color: #3c4043;
+  }
+
+  &:not(:disabled):hover {
+    transform: scale(1.05) rotate(-2deg);
+    background: #f4f8ff;
+    color: #174ea6;
+  }
+
+  &:not(:disabled):active {
+    box-shadow: 0 4px 4px 0 rgb(60 64 67 / 30%), 0 8px 12px 6px rgb(60 64 67 / 15%);
+    outline: none;
+  }
+
+  &:not(:disabled):focus {
+    outline: none;
+    border: 2px solid #ffbd21;
   }
   
   span {
     transition: all 200ms;
   }
 
-  &:hover span {
+  &:not(:disabled):hover span {
     transform: scale(.9);
   }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.game-main-container, .wager-container, .voting-container {
+  margin: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  line-height: 4rem;
+
+  @media (min-width: 500px) {
+    margin: 2rem 2rem;
+  }
+
+  @media (min-width: 800px) {
+    margin: 2rem 8%;
+  }
+
+  .game-description {
+    border: 1px solid white;
+    border-radius: 12px;
+    font-size: 1.4rem;
+    line-height: 3rem;
+    padding: 16px;
+
+    @media (max-width: 800px) {
+      font-size: 1rem;
+      line-height: 2rem;
+      padding: 8px;
+    }
+  }
+
+  h2 {
+    @media (max-width: 800px) {
+      font-size: 1.4rem;
+      line-height: 2rem;
+    }
+  }
+  .game-title {
+    font-size: 4rem;
+  }
+}
+
+.wager-container {
+  .drinks-grid {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 75px);
+    grid-template-rows: auto;
+    gap: 4px;
+    justify-items: center;
+
+    .drink-item {
+      padding: 4px;
+      height: 50px;
+      align-self: center;
+    }
+  }
+
+  .wager-buttons-container {
+    display: flex;
+
+    input { 
+      background: none;
+      border: none;
+      font-size: 2rem;
+      width: 50px;
+      text-align: center;
+      align-self: center;
+      color: $light-colour;
+  
+      &:focus {
+        border: none;
+        outline: none;
+      }
+    }
+
+    .wager-button {
+      background: none;
+      padding: 0;
+      border: none;
+  
+      &:hover {
+        scale: 120%;
+      }
+    
+      &:active {
+        scale: 95%;      
+      }
+    }
+  }
+}
+
+.trivia-container {
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+  padding: 10px;
+  max-width: 1500px;
+
+  @media (max-width: 800px) {
+    gap: 20px;
+  }
+
+  .trivia-header {
+    display: flex;
+    gap: 50px;
+    justify-content: space-between;
+
+    @media (max-width: 950px) {
+      font-size: 1rem;
+
+      gap: 10px;
+      line-height: 2rem;
+    }
+  }
+  h1 {
+    font-size: 3rem;
+    @media (max-width: 700px) {
+      font-size: 2.5rem;
+      line-height: 3rem;
+     }
+  }
+  .trivia-buttons-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+}
+
+.potato-container {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  
+  .potato-image {
+    width: 200px;
+    @media (max-width: 700px) {
+      width: 150px;
+    }
+  }
+
+  .greyed {
+    position: absolute; 
+    left: 0; 
+    right: 0;  
+  }
+  .hot-potato-player {
+    padding: 10px;
+    display: grid;
+    background-color: $game-background-colour;
+    border-radius: 20px;
+    min-height: 300px;
+    h1, h2 {
+      align-self: start;
+      justify-self: center;
+    }
+    button {
+      justify-self: center;
+    }
+  }
+}
+
+h2.timer {
+  font-size: 4rem;
 }

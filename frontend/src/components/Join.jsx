@@ -154,6 +154,7 @@ function NameTag({ username, usernameHandler, errorHandler }) {
           usernameHandler(e.target.value);
           errorHandler(null);
         }}
+        autoComplete="off"
         placeholder="Enter your name"
         className="w-full"
       />

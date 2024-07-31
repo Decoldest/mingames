@@ -280,7 +280,7 @@ io.on("connection", (socket) => {
       }
 
       const allPlayersWagered = room.players.every(
-        (player) => player.wager > 0,
+        (player) => player.wager >= 0,
       );
 
       //Let all players know wagers placed

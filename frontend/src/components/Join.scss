@@ -65,6 +65,10 @@ $join-input-border: #6a2500;
   @media (max-width: 480px) {
     font-size: 1.8rem;
   }
+
+  &:focus {
+    outline: none;
+  }
 }
 
 .back-button {

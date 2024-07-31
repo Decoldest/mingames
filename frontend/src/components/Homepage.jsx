@@ -93,7 +93,7 @@ export default function Homepage() {
   }
 
   return (
-    <main className="font-sans min-h-screen flex flex-col items-center justify-center gap-6 sm:gap-10">
+    <main className="min-h-screen flex flex-col items-center justify-center gap-6 sm:gap-10">
       <Join
         creatingRoom={true}
         handleCreateRoom={handleCreateRoom}

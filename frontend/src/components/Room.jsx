@@ -92,7 +92,7 @@ export default function Room() {
   };
 
   return (
-    <main className="font-sans min-h-screen flex items-start justify-center pt-20">
+    <main className="min-h-screen flex items-start justify-center pt-5 sm:pt-20">
       {waiting ? (
         <WaitingRoom username={username} isPartyLeader={isPartyLeader} />
       ) : playing ? (

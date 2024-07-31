@@ -2,6 +2,8 @@ import PropTypes from "prop-types";
 import { useEffect, useContext, useState } from "react";
 import UserContext from "../UserContext";
 import { socket } from "../../socket";
+import potatoImage from "../../assets/potato.png";
+import potatoGreyed from "../../assets/potato-greyed.png";
 
 HotPotato.propTypes = {
   gameData: PropTypes.object,
@@ -45,31 +47,59 @@ export default function HotPotato({ roomID, gameData, changeGameData }) {
 
   return (
     <>
-      <div>{timer}</div>
-      <div className="flex flex-row">
+      <h2 className="timer">{timer}</h2>
+      <div className="potato-container">
         {Object.entries(gameData).map(([player, potato], i) =>
           player.localeCompare(username) === 0 ? (
-            <div key={i}>
-              <h1>{player}</h1>
-              {playerHasPotato && (
+            <div key={i} className="hot-potato-player">
+              <h1>
+                {player} {`(you)`}
+              </h1>
+              {playerHasPotato ? (
                 <>
-                  <p>potato</p>
+                  <img
+                    className="potato-image"
+                    src={potatoImage}
+                    alt="Potato"
+                  />
                   <h2>You have the potato</h2>
                 </>
+              ) : (
+                <img
+                  className="potato-image greyed"
+                  src={potatoGreyed}
+                  alt="Potato"
+                />
               )}
             </div>
           ) : (
-            <div key={i}>
+            <div key={i} className="hot-potato-player">
               <h1>{player}</h1>
               {playerHasPotato && (
                 <button
                   disabled={disabled}
                   onClick={() => givePotatoToPlayer(player)}
+                  className="game-button"
                 >
                   Pass Potato
                 </button>
               )}
-              {potato.hasPotato && <p>potato</p>}
+              {potato.hasPotato ? (
+                <>
+                  <img
+                    className="potato-image"
+                    src={potatoImage}
+                    alt="Potato"
+                  />{" "}
+                  <h2>{player} has the potato</h2>
+                </>
+              ) : (
+                <img
+                  className="potato-image greyed"
+                  src={potatoGreyed}
+                  alt="Potato"
+                />
+              )}
             </div>
           ),
         )}

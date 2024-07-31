@@ -1,7 +1,7 @@
 const Room = require("../models/room");
 const { handlePotatoWinnerVoting } = require("./votingSocket");
 
-const MAX_TIMER = 600;
+const MAX_TIMER = 100;
 const TIMER_INTERVAL = 100;
 
 const sendPlayers = async (io, roomID, room) => {

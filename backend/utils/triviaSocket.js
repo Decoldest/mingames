@@ -6,7 +6,6 @@ const maxRound = 4;
 
 const sendTriviaQuestions = async (io, roomID) => {
   try {
-    console.log("getting trivia data");
     const response = await fetch(
       "https://opentdb.com/api.php?amount=5&type-multiple",
       {

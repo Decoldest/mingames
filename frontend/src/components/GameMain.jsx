@@ -39,7 +39,7 @@ export default function GameMain({ isPartyLeader, state, setState }) {
       },
       "Hot Potato": {
         component: HotPotato,
-        description: `It's literally hot potato. People who have a potato at the end of the game drink`,
+        description: `It's literally hot potato. People who have a potato at the end of the game drink.`,
         emoji: "🥔",
       },
       "Button Press": {
@@ -155,14 +155,14 @@ export default function GameMain({ isPartyLeader, state, setState }) {
   };
 
   return (
-    <section className="w-full">
+    <section className="w-full game-main-container">
       {isWagering ? (
-        <div>
-          <h1>{selectedGame}</h1>
+        <div className="wager-container">
+          <h1 className="game-title tset">{selectedGame}</h1>
           <h3>
             {gameData && gameData.round ? `Round: ${gameData.round + 1}` : ""}
           </h3>
-          <p>{selectedGameDescription}</p>
+          <p className="game-description">{selectedGameDescription}</p>
           <Wager roomID={roomID} />
         </div>
       ) : votingData ? (
@@ -185,7 +185,8 @@ export default function GameMain({ isPartyLeader, state, setState }) {
         )
       ) : (
         <div className="game-buttons-container">
-          <h2>Choose A Game</h2>
+          {isPartyLeader ? <h2>Choose a game</h2> : <h2>Games</h2>}
+         
           <div className="game-buttons-grid">
             {Object.keys(games).map((game) => (
               <button
@@ -198,7 +199,7 @@ export default function GameMain({ isPartyLeader, state, setState }) {
               </button>
             ))}
           </div>
-          {!isPartyLeader && <h2>Party leader will select game.</h2>}
+          {!isPartyLeader && <h2 className="leader-message">*Party leader will select the game</h2>}
         </div>
       )}
     </section>

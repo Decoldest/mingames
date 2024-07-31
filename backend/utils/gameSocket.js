@@ -32,7 +32,7 @@ const handleAfterVotingDone = async (socket, io, roomID) => {
     {
       socketID: socket.id,
     },
-    { wager: 0 },
+    { wager: -1 },
   );
 
   const room = await Room.findOne({ code: roomID }).populate("players");

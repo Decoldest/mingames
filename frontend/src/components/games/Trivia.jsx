@@ -46,12 +46,18 @@ export default function Trivia({
 
   return (
     <>
-      <div>
-        <h2>Round: {round + 1} / 5</h2>
+      <div className="trivia-container">
+        <div className="trivia-header">
+          <h3>Trivia</h3>
+          <h3>Question {round + 1} of 5</h3>
+        </div>
         {/* Decode html before displaying */}
-        <h3>{he.decode(currentQuestion.question)}</h3>
+        <div>
+          <p>{he.decode(currentQuestion.category)}</p>
+          <h1>{he.decode(currentQuestion.question)}</h1>
+        </div>
         {!waitingMessage && (
-          <div>
+          <div className="trivia-buttons-grid">
             {currentAnswers.map((answer, index) => (
               <button
                 key={index}
@@ -59,6 +65,7 @@ export default function Trivia({
                   sendQuestionChoice(correct_answer, answer);
                   setWaitingMessage("Waiting for other players to answer...");
                 }}
+                className="game-button"
               >
                 {he.decode(answer)}
               </button>

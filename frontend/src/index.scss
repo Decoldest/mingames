@@ -10,9 +10,10 @@ $main-text-colour: rgb(238, 238, 238);
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif;
 }
 
-h1, h2, h3, h4, h5, h6, h7, p {
+h1, h2, h3, h4, h5, h6, p, span {
   color: $main-text-colour;
 }
 
@@ -105,6 +106,9 @@ canvas {
   outline: solid #D36582 2.5px;
   color: #213364;
 
+  p {
+    color: #c78b1b;
+  }
   @media (max-width: 650px) {
     font-size: 0.875rem;
   }
