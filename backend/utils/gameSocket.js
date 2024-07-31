@@ -38,7 +38,7 @@ const handleAfterVotingDone = async (socket, io, roomID) => {
   const room = await Room.findOne({ code: roomID }).populate("players");
 
   //Check if all ready and set next question state if truthy
-  const allPlayersReady = room.players.every((player) => player.wager === 0);
+  const allPlayersReady = room.players.every((player) => player.wager === -1);
   const { selectedGame } = room.state;
 
   if (allPlayersReady) {
