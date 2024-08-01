@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import UserContext from "./UserContext";
 import PropTypes from "prop-types";
 import { socket } from "../socket";
+import holdingDrinkImage from "../assets/holding-glass.png";
 
 Voting.propTypes = {
   votingData: PropTypes.object,
@@ -23,6 +24,7 @@ export default function Voting({
   const [isDoneDrinking, setIsDoneDrinking] = useState(false);
 
   useEffect(() => {
+    console.log(votingData);
     //Set the current user's drinks to give
     setDrinksToGive(votingData[username].drinksToGive || 0);
 
@@ -35,6 +37,7 @@ export default function Voting({
     };
 
     const allocateDrinks = (votingData) => {
+      setVotingData(votingData);
       setVotingResults(votingData[username]?.myDrinks);
     };
 
@@ -55,9 +58,11 @@ export default function Voting({
   };
 
   return (
-    <section>
-      <div>{votingData[username].message}</div>
-      {votingResults >= 0 ? (
+    <div className="voting-container">
+      <h2 className="self-center">
+        {votingData[username] && votingData[username].message}
+      </h2>
+      {votingData.done ? (
         <div>
           <h1>
             You take {votingResults} {votingResults == 1 ? `drink` : `drinks`}
@@ -73,35 +78,49 @@ export default function Voting({
               setIsDoneDrinking(true);
             }}
             disabled={isDoneDrinking}
+            className="game-button"
           >
             Done Drinking
           </button>
         </div>
       ) : (
         <>
-          <div className="flex gap-4">
+          <div className="voting-grid">
             {Object.entries(votingData).map(([name, drinks], i) => (
-              <div key={i} className="flex-column">
-                <h2>{name}</h2>
-                <h5>{drinks.myDrinks}</h5>
-                {name !== username && drinksToGive > 0 && (
-                  <button
-                    onClick={() => {
-                      addDrink(name);
-                    }}
-                  >
-                    Give Drink
-                  </button>
-                )}
-              </div>
+              typeof drinks === 'object' && (
+                <div key={i} className="voting-player">
+                  <h2>{name}</h2>
+                  <h3>Drinks: {drinks.myDrinks}</h3>
+                  <div className="holding-drink-container">
+                    {Array.from({ length: drinks.myDrinks }, (_, i) => (
+                      <img
+                        key={i}
+                        src={holdingDrinkImage}
+                        alt="Holding Drink Icon"
+                        id="holding-drink"
+                      />
+                    ))}
+                  </div>
+                  {name !== username && drinksToGive > 0 && (
+                    <button
+                      onClick={() => {
+                        addDrink(name);
+                      }}
+                      className="game-button"
+                    >
+                      Give Drink
+                    </button>
+                  )}
+                </div>
+              )
             ))}
             {warning && <div className="warning">{warning}</div>}
           </div>
-          <div>
+          <h2 className="self-center">
             {drinksToGive} {drinksToGive == 1 ? `Drink` : `Drinks`} To Give
-          </div>
+          </h2>
         </>
       )}
-    </section>
+    </div>
   );
 }

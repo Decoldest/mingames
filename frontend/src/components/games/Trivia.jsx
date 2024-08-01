@@ -48,11 +48,11 @@ export default function Trivia({
     <>
       <div className="trivia-container">
         <div className="trivia-header">
-          <h3>Trivia</h3>
+          <h3>🧠 Trivia</h3>
           <h3>Question {round + 1} of 5</h3>
         </div>
         {/* Decode html before displaying */}
-        <div>
+        <div className="trivia-question">
           <p>{he.decode(currentQuestion.category)}</p>
           <h1>{he.decode(currentQuestion.question)}</h1>
         </div>

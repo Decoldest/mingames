@@ -14,3 +14,4 @@ Currently, two official plugins are available:
 <a href="https://www.flaticon.com/free-icons/wine-glass" title="wine glass icons">Wine glass icons created by Freepik - Flaticon</a>
 
 <a href="https://www.flaticon.com/free-icons/potato" title="potato icons">Potato icons created by Freepik - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/wine" title="wine icons">Wine icons created by Freepik - Flaticon</a>

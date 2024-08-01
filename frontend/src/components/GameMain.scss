@@ -54,6 +54,10 @@ $game-background-colour:#253C78;
   will-change: transform,opacity;
   z-index: 10;
 
+  @media (max-width: 500px) {
+    font-size: 0.75rem;
+  }
+  
   span {
     color: #3c4043;
   }
@@ -95,11 +99,11 @@ $game-background-colour:#253C78;
   line-height: 4rem;
 
   @media (min-width: 500px) {
-    margin: 2rem 2rem;
+    margin: 0.5rem 2rem;
   }
 
   @media (min-width: 800px) {
-    margin: 2rem 8%;
+    margin: 0.5rem 8%;
   }
 
   .game-description {
@@ -180,8 +184,7 @@ $game-background-colour:#253C78;
 .trivia-container {
   display: flex;
   flex-direction: column;
-  gap: 50px;
-  padding: 10px;
+  gap: 30px;
   max-width: 1500px;
 
   @media (max-width: 800px) {
@@ -203,7 +206,7 @@ $game-background-colour:#253C78;
   h1 {
     font-size: 3rem;
     @media (max-width: 700px) {
-      font-size: 2.5rem;
+      font-size: 2rem;
       line-height: 3rem;
      }
   }
@@ -212,41 +215,60 @@ $game-background-colour:#253C78;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
   }
+  .trivia-question {
+    padding: 0px 20px 10px 20px;
+    background-color: $game-background-colour;
+    border-radius: 20px;
+  }
 }
 
 .potato-container {
   display: grid;
   gap: 10px;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  
-  .potato-image {
-    width: 200px;
-    @media (max-width: 700px) {
-      width: 150px;
-    }
-  }
 
-  .greyed {
-    position: absolute; 
-    left: 0; 
-    right: 0;  
-  }
   .hot-potato-player {
     padding: 10px;
-    display: grid;
+    display: flex;
+    flex-direction: column;
     background-color: $game-background-colour;
     border-radius: 20px;
     min-height: 300px;
-    h1, h2 {
-      align-self: start;
-      justify-self: center;
-    }
+    justify-content: flex-start;
+    align-items: center;
+
     button {
-      justify-self: center;
+      position: relative;
+      top: -30%;
+    }
+
+    .potato-image {
+      width: 200px;
+      @media (max-width: 700px) {
+        width: 150px;
+      }
     }
   }
 }
 
 h2.timer {
   font-size: 4rem;
+}
+
+.voting-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 20px;
+
+  .voting-player {
+    display: flex;
+    flex-direction: column;
+    padding: 0px 20px 10px 20px;
+    background-color: $game-background-colour;
+    border-radius: 20px;
+  }
+
+  #holding-drink {
+    width: 30px;
+  }
 }

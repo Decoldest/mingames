@@ -47,7 +47,7 @@ export default function HotPotato({ roomID, gameData, changeGameData }) {
 
   return (
     <>
-      <h2 className="timer">{timer}</h2>
+      <h2 className="timer">{timer} s</h2>
       <div className="potato-container">
         {Object.entries(gameData).map(([player, potato], i) =>
           player.localeCompare(username) === 0 ? (
@@ -75,15 +75,6 @@ export default function HotPotato({ roomID, gameData, changeGameData }) {
           ) : (
             <div key={i} className="hot-potato-player">
               <h1>{player}</h1>
-              {playerHasPotato && (
-                <button
-                  disabled={disabled}
-                  onClick={() => givePotatoToPlayer(player)}
-                  className="game-button"
-                >
-                  Pass Potato
-                </button>
-              )}
               {potato.hasPotato ? (
                 <>
                   <img
@@ -99,6 +90,15 @@ export default function HotPotato({ roomID, gameData, changeGameData }) {
                   src={potatoGreyed}
                   alt="Potato"
                 />
+              )}
+              {playerHasPotato && (
+                <button
+                  disabled={disabled}
+                  onClick={() => givePotatoToPlayer(player)}
+                  className="game-button"
+                >
+                  Pass Potato
+                </button>
               )}
             </div>
           ),

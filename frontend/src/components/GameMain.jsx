@@ -158,7 +158,7 @@ export default function GameMain({ isPartyLeader, state, setState }) {
     <section className="w-full game-main-container">
       {isWagering ? (
         <div className="wager-container">
-          <h1 className="game-title tset">{selectedGame}</h1>
+          <h1 className="game-title text-center">{selectedGame}</h1>
           <h3>
             {gameData && gameData.round ? `Round: ${gameData.round + 1}` : ""}
           </h3>
