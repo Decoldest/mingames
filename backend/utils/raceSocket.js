@@ -173,7 +173,8 @@ const updateWinnerAndLosers = async (trainer, roomID, io) => {
 
   // Wait 2 seconds before starting voting process
   setTimeout(function () {
-    handleRaceWinnerVoting(io, roomID, drinkData);
+    
+    eWinnerVoting(io, roomID, drinkData);
   }, 3000);
 };
 

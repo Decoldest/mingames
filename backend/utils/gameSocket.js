@@ -61,15 +61,26 @@ const handleAfterVotingDone = async (socket, io, roomID) => {
   }
 };
 
-const handlePlayerJoiningLate = async (room, username) => {
-  const { selectedGame, gameData, votingData } = room.state;
+const handlePlayerJoiningLate = async (room, username, socketID) => {
+  const { selectedGame, gameData, votingData, isWagering } = room.state;
   let addedGameData;
   let addedVotingData = null;
 
+  // Update room game data
   if (selectedGame === "Hot Potato") {
     addedGameData = { [username]: { hasPotato: false } };
   } else if (selectedGame === "Button Press") {
     addedGameData = { [username]: 0 };
+  }
+
+  //Will set the wager property as long as the room is not in the process of wagering
+  if (!isWagering) {
+    await Player.findOneAndUpdate(
+      {
+        socketID: socketID,
+      },
+      { wager: 0 },
+    );
   }
 
   room.state.gameData = {
@@ -77,6 +88,7 @@ const handlePlayerJoiningLate = async (room, username) => {
     ...addedGameData,
   };
 
+  // Set the voting data
   if (votingData !== null) {
     addedVotingData = {
       [username]: {

@@ -176,6 +176,7 @@ io.on("connection", (socket) => {
         const updatedData = await handlePlayerJoiningLate(
           updatedRoom,
           username,
+          socket.id
         );
 
         //Change frontend state to match database

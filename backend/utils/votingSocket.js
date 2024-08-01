@@ -27,6 +27,7 @@ const giveDrink = async (io, roomID, giverName, receiverName) => {
       // Emit the updated voting data to the room
       io.to(roomID).emit("update-voting-data", votingData);
     }
+    console.log("votingData: ", votingData);
     checkAllDrinksGiven(io, roomID, votingData);
   } catch (error) {
     console.error("Error giving drink:", error);
@@ -39,6 +40,7 @@ const checkAllDrinksGiven = async (io, roomID, votingData) => {
     .filter(([_name, value]) => typeof value === "object")
     .every(([_name, player]) => player.drinksToGive <= 0);
 
+  
   if (allDrinksGiven) {
     //Add done:true property
     votingData = {
