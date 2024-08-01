@@ -19,7 +19,7 @@ export default function Voting({
 }) {
   const [drinksToGive, setDrinksToGive] = useState(0);
   const [warning, setWarning] = useState(null);
-  const [votingResults, setVotingResults] = useState(-1);
+  const [votingResults, setVotingResults] = useState(0);
   const { username } = useContext(UserContext);
   const [isDoneDrinking, setIsDoneDrinking] = useState(false);
 
@@ -86,38 +86,41 @@ export default function Voting({
       ) : (
         <>
           <div className="voting-grid">
-            {Object.entries(votingData).map(([name, drinks], i) => (
-              typeof drinks === 'object' && (
-                <div key={i} className="voting-player">
-                  <h2>{name}</h2>
-                  <h3>Drinks: {drinks.myDrinks}</h3>
-                  <div className="holding-drink-container">
-                    {Array.from({ length: drinks.myDrinks }, (_, i) => (
-                      <img
-                        key={i}
-                        src={holdingDrinkImage}
-                        alt="Holding Drink Icon"
-                        id="holding-drink"
-                      />
-                    ))}
+            {Object.entries(votingData).map(
+              ([name, drinks], i) =>
+                typeof drinks === "object" && (
+                  <div key={i} className="voting-player">
+                    <h2>{name}</h2>
+                    <h3>Drinks: {drinks.myDrinks}</h3>
+                    <div className="holding-drink-container">
+                      {Array.from({ length: drinks.myDrinks }, (_, i) => (
+                        <img
+                          key={i}
+                          src={holdingDrinkImage}
+                          alt="Holding Drink Icon"
+                          id="holding-drink"
+                        />
+                      ))}
+                    </div>
+                    {name !== username && drinksToGive > 0 && (
+                      <button
+                        onClick={() => {
+                          addDrink(name);
+                        }}
+                        className="game-button"
+                      >
+                        Give Drink
+                      </button>
+                    )}
                   </div>
-                  {name !== username && drinksToGive > 0 && (
-                    <button
-                      onClick={() => {
-                        addDrink(name);
-                      }}
-                      className="game-button"
-                    >
-                      Give Drink
-                    </button>
-                  )}
-                </div>
-              )
-            ))}
+                ),
+            )}
             {warning && <div className="warning">{warning}</div>}
           </div>
           <h2 className="self-center">
-            {drinksToGive} {drinksToGive == 1 ? `Drink` : `Drinks`} To Give
+            {drinksToGive < 0
+              ? "0 Drinks To Give Since You Joined Late"
+              : `${drinksToGive} ${drinksToGive === 1 ? "Drink" : "Drinks"} To Give`}
           </h2>
         </>
       )}

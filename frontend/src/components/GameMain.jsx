@@ -10,7 +10,6 @@ import { socket } from "../socket";
 import ButtonPress from "./games/ButtonPress";
 import "./GameMain.scss";
 
-
 GameMain.propTypes = {
   isPartyLeader: PropTypes.bool,
   state: PropTypes.object,
@@ -23,33 +22,32 @@ export default function GameMain({ isPartyLeader, state, setState }) {
   const { isWagering, selectedGame, gameData, votingData, waitingMessage } =
     state;
 
-    const games = {
-      Trivia: {
-        component: Trivia,
-        description: `Answer the trivia question correctly and you will get to hand out the amount of drinks you wager to other players.
+  const games = {
+    Trivia: {
+      component: Trivia,
+      description: `Answer the trivia question correctly and you will get to hand out the amount of drinks you wager to other players.
         If you guess incorrectly, you have to drink your wager. Players who answered correctly can also hand out drinks to you.`,
-        emoji: "🧠",
-      },
-      Race: {
-        component: Race,
-        description: `You will get a squirtle that will race the other players' squirtles. Wager a number of drinks 
+      emoji: "🧠",
+    },
+    Race: {
+      component: Race,
+      description: `You will get a squirtle that will race the other players' squirtles. Wager a number of drinks 
         on your squirtle winning the race. Winner gets to give drinks out. Losers will
         drink their wager plus any additional drinks given to them.`,
-        emoji: "🏁",
-      },
-      "Hot Potato": {
-        component: HotPotato,
-        description: `It's literally hot potato. People who have a potato at the end of the game drink.`,
-        emoji: "🥔",
-      },
-      "Button Press": {
-        component: ButtonPress,
-        description: `Press the button as many times as possible before the timer ends. The player with the most button presses
+      emoji: "🏁",
+    },
+    "Hot Potato": {
+      component: HotPotato,
+      description: `It's literally hot potato. People who have a potato at the end of the game drink.`,
+      emoji: "🥔",
+    },
+    "Button Press": {
+      component: ButtonPress,
+      description: `Press the button as many times as possible before the timer ends. The player with the most button presses
         is safe. The other players drink.`,
-        emoji: "🔘",
-      },
-    };
-    
+      emoji: "🔘",
+    },
+  };
 
   useEffect(() => {
     const handleStartWagers = () => {
@@ -76,11 +74,20 @@ export default function GameMain({ isPartyLeader, state, setState }) {
       setState(state);
     };
 
-    const handleLatePlayer = (data) => {
-      setState((prevState) => ({
-        ...prevState,
-        gameData: { ...prevState.gameData, ...data },
-      }));
+    const handleLatePlayer = (addedGameData, addedVotingData) => {
+
+      setState((prevState) => {
+        // Handle null or undefined addedVotingData
+        const votingDataUpdate = addedVotingData
+          ? { ...prevState.votingData, ...addedVotingData }
+          : prevState.votingData;
+
+        return {
+          ...prevState,
+          gameData: { ...prevState.gameData, ...addedGameData },
+          votingData: votingDataUpdate,
+        };
+      });
     };
 
     //Resets the screen to game selection state
@@ -186,7 +193,7 @@ export default function GameMain({ isPartyLeader, state, setState }) {
       ) : (
         <div className="game-buttons-container">
           {isPartyLeader ? <h2>Choose a game</h2> : <h2>Games</h2>}
-         
+
           <div className="game-buttons-grid">
             {Object.keys(games).map((game) => (
               <button
@@ -195,11 +202,17 @@ export default function GameMain({ isPartyLeader, state, setState }) {
                 disabled={!isPartyLeader}
                 className="game-button"
               >
-                <span>{games[game].emoji} {game}</span>
+                <span>
+                  {games[game].emoji} {game}
+                </span>
               </button>
             ))}
           </div>
-          {!isPartyLeader && <h2 className="leader-message">*Party leader will select the game</h2>}
+          {!isPartyLeader && (
+            <h2 className="leader-message">
+              *Party leader will select the game
+            </h2>
+          )}
         </div>
       )}
     </section>
