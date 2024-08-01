@@ -181,7 +181,7 @@ io.on("connection", (socket) => {
         //Change frontend state to match database
         callback({ success: true, state: updatedData.state });
 
-        io.to(roomID).emit("late-player-data", updatedData.addedData);
+        io.to(roomID).emit("late-player-data", updatedData.addedGameData, updatedData.addedVotingData);
 
         process.nextTick(() => {
           io.to(roomID).emit("joined-room", username);

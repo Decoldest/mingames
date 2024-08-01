@@ -62,22 +62,38 @@ const handleAfterVotingDone = async (socket, io, roomID) => {
 };
 
 const handlePlayerJoiningLate = async (room, username) => {
-  const { selectedGame, gameData } = room.state;
-  let addedData;
+  const { selectedGame, gameData, votingData } = room.state;
+  let addedGameData;
+  let addedVotingData = null;
 
   if (selectedGame === "Hot Potato") {
-    addedData = { [username]: { hasPotato: false } };
+    addedGameData = { [username]: { hasPotato: false } };
   } else if (selectedGame === "Button Press") {
-    addedData = { [username]: 0 };
+    addedGameData = { [username]: 0 };
   }
 
   room.state.gameData = {
     ...gameData,
-    ...addedData,
+    ...addedGameData,
   };
 
+  if (votingData !== null) {
+    addedVotingData = {
+      [username]: {
+        drinksToGive: 0,
+        myDrinks: 0,
+        correct: false,
+        message: "You joined late",
+      },
+    };
+    room.state.votingData = {
+      ...votingData,
+      ...addedVotingData,
+    };
+  }
+
   await room.save();
-  return { state: room.state, addedData };
+  return { state: room.state, addedGameData, addedVotingData };
 };
 
 module.exports = {

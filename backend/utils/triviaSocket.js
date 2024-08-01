@@ -1,6 +1,6 @@
 const Player = require("../models/player");
 const Room = require("../models/room");
-const { handleStartVoting } = require("./votingSocket");
+const { handleStartTriviaVoting } = require("./votingSocket");
 
 const maxRound = 4;
 
@@ -86,8 +86,12 @@ const triviaAnswered = async (socket, io, roomID, correctAnswer, choice) => {
   //Go through each player and add drink data
   if (allPlayersAnswered) {
     const drinkData = {};
+    let allPlayersIncorrect = true;
 
     room.players.forEach(async (player) => {
+      if (player.wonBet) {
+        allPlayersIncorrect = false;
+      }
       // Check if the player has a wonBet property (player could have joined late)
       if (player.wonBet === null) {
         drinkData[player.username] = {
@@ -118,7 +122,7 @@ const triviaAnswered = async (socket, io, roomID, correctAnswer, choice) => {
         await player.save();
       }
     });
-    handleStartVoting(io, roomID, drinkData);
+    handleStartTriviaVoting(io, roomID, drinkData, allPlayersIncorrect);
   }
 };
 

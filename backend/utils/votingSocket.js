@@ -34,35 +34,42 @@ const giveDrink = async (io, roomID, giverName, receiverName) => {
 };
 
 const checkAllDrinksGiven = async (io, roomID, votingData) => {
-  const allDrinksGiven = Object.values(votingData).every(
-    (player) => player.drinksToGive === 0,
-  );
+  // Filter done: boolean property, otherwise would always be false
+  const allDrinksGiven = Object.entries(votingData)
+    .filter(([_name, value]) => typeof value === "object")
+    .every(([_name, player]) => player.drinksToGive <= 0);
+
   if (allDrinksGiven) {
+    //Add done:true property
+    votingData = {
+      ...votingData,
+      done: true,
+    };
+    await setVotingData(roomID, votingData);
     io.to(roomID).emit("all-drinks-given", votingData);
-    try {
-      await setVotingData(roomID, null);
-    } catch (error) {
-      console.error("Error resetting votingData:", error);
-    }
   }
 };
 
-const handleStartVoting = (io, roomID, votingData) => {
-  const allPlayersIncorrect = Object.values(votingData).every(
-    (player) => player.correct === false,
-  );
-
+const handleStartTriviaVoting = async (
+  io,
+  roomID,
+  votingData,
+  allPlayersIncorrect,
+) => {
   if (allPlayersIncorrect) {
     Object.values(votingData).forEach((player) => {
       player.message = "You all got the question wrong lol";
     });
-    // Change state to voting
+    // Change state to voting, done means no player needs to give out drinks
+    votingData = {
+      ...votingData,
+      done: true,
+    };
+    await setVotingData(roomID, votingData);
     io.to(roomID).emit("start-voting", votingData);
-
-    // Give out drinks immediately since no player can allocate any
     io.to(roomID).emit("all-drinks-given", votingData);
   } else if (
-    Object.values(votingData).every((player) => player.drinksToGive === 0)
+    Object.values(votingData).every((player) => player.drinksToGive <= 0)
   ) {
     Object.values(votingData).forEach((player) => {
       // Checks for players who joined late and could not wager
@@ -70,9 +77,21 @@ const handleStartVoting = (io, roomID, votingData) => {
         player.message = "You were correct but you didn't place a wager";
       }
     });
+    votingData = {
+      ...votingData,
+      done: true,
+    };
+    await setVotingData(roomID, votingData);
     io.to(roomID).emit("start-voting", votingData);
     io.to(roomID).emit("all-drinks-given", votingData);
   } else {
+    // Change state to voting, !done means players willl give out drinks
+    votingData = {
+      ...votingData,
+      done: false,
+    };
+    await setVotingData(roomID, votingData);
+
     io.to(roomID).emit("start-voting", votingData);
     setVotingData(roomID, votingData);
   }
@@ -90,7 +109,7 @@ const handleButtonPressVoting = handleRaceWinnerVoting;
 module.exports = {
   setVotingData,
   giveDrink,
-  handleStartVoting,
+  handleStartTriviaVoting,
   handleRaceWinnerVoting,
   handlePotatoWinnerVoting,
   handleButtonPressVoting,
