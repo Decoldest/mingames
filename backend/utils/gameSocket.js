@@ -27,7 +27,7 @@ const handleAfterVotingDone = async (socket, io, roomID) => {
 
     io.to(roomID).emit("end-game");
   };
-  //Reset the player's wager to 0
+  //Reset the player's wager to -1
   await Player.findOneAndUpdate(
     {
       socketID: socket.id,
@@ -73,8 +73,8 @@ const handlePlayerJoiningLate = async (room, username, socketID) => {
     addedGameData = { [username]: 0 };
   }
 
-  //Will set the wager property as long as the room is not in the process of wagering
-  if (!isWagering) {
+  //Will set the wager property if a game is being played
+  if (gameData) {
     await Player.findOneAndUpdate(
       {
         socketID: socketID,
