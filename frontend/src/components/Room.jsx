@@ -10,19 +10,32 @@ export default function Room() {
   const { roomID } = useParams();
   const location = useLocation();
   const { username, setUsername } = useContext(UserContext);
+
+  console.log("Location state:", location.state);
+
   const { isPartyLeader } = location.state || false;
   const [error, setError] = useState(null);
   const [state, setState] = useState({
     waiting: location.state?.waiting || false,
     playing: location.state?.playing || false,
-    isWagering: false,
-    selectedGame: null,
-    gameData: null,
-    votingData: null,
+    isWagering: location.state?.isWagering ||false,
+    selectedGame: location.state?.selectedGame || null,
+    gameData: location.state?.gameData || null,
+    votingData: location.state?.votingData ||null,
     waitingMessage: "",
   });
+  
 
   const { waiting, playing } = state;
+
+  useEffect(() => {
+    console.log("Initial state:", state);
+  }, [state]);
+
+  // Use effect to log the state whenever it changes
+  useEffect(() => {
+    console.log("Updated state:", state);
+  }, [state]);
 
   useEffect(() => {
     // Event handlers for socket events
@@ -75,6 +88,8 @@ export default function Room() {
   const joinRoom = () => {
     socket.emit("join-room", roomID, username, (response) => {
       if (response.success) {
+        console.log(response.state);
+
         setState(response.state);
       } else {
         setError(response.message);

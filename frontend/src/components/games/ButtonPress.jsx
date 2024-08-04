@@ -60,22 +60,22 @@ export default function ButtonPress({
   });
 
   return (
-    <>
-      <div>{timer}</div>
-      <div className="flex flex-row">
+    <div className="button-game-container">
+      <h2 className="timer">{timer} s</h2>
+      <div className="scoreboard">
         {Object.entries(gameData).map(([player, score], i) => (
-          <div key={i}>
+          <div key={i} className="player-score">
             <h1>{player}</h1>
             <p>{score}</p>
           </div>
         ))}
       </div>
-      <div>
-        <h1>{myScore}</h1>
-        <button disabled={disabled} onClick={() => pressedButton()}>
+      <div className="player-score-and-button">
+        <h1 id="score" className="mb-4">{myScore}</h1>
+        <button disabled={disabled} onClick={() => pressedButton()} className="button-game-button">
           Click Me
         </button>
       </div>
-    </>
+    </div>
   );
 }

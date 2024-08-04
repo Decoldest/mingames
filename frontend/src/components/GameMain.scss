@@ -126,8 +126,16 @@ $game-background-colour:#253C78;
       line-height: 2rem;
     }
   }
+
+  h1 {
+    font-size: 3rem;
+    @media (max-width: 800px) {
+      font-size: 2rem;
+      line-height: 2.5rem;
+    }
+  }
   .game-title {
-    font-size: 4rem;
+    font-size: 3rem;
   }
 }
 
@@ -140,6 +148,11 @@ $game-background-colour:#253C78;
     gap: 4px;
     justify-items: center;
 
+    @media (max-width: 600px) {
+      justify-content: center;
+
+    }
+
     .drink-item {
       padding: 4px;
       height: 50px;
@@ -148,16 +161,18 @@ $game-background-colour:#253C78;
   }
 
   .wager-buttons-container {
+    width: 200px;
     display: flex;
+    justify-content: space-evenly;
 
     input { 
       background: none;
       border: none;
       font-size: 2rem;
       width: 50px;
-      text-align: center;
-      align-self: center;
       color: $light-colour;
+      text-align: center;
+      letter-spacing: -5px;
   
       &:focus {
         border: none;
@@ -242,6 +257,14 @@ $game-background-colour:#253C78;
       top: -30%;
     }
 
+    h1 {
+      text-align: center;
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     .potato-image {
       width: 200px;
       @media (max-width: 700px) {
@@ -253,22 +276,172 @@ $game-background-colour:#253C78;
 
 h2.timer {
   font-size: 4rem;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+.timer-container {
+  display: flex;
+  align-items: center;
 }
 
 .voting-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
   gap: 20px;
 
   .voting-player {
     display: flex;
+    justify-content: space-between;
     flex-direction: column;
-    padding: 0px 20px 10px 20px;
-    background-color: $game-background-colour;
+    padding: 10px 20px;
     border-radius: 20px;
+    background-color: $game-background-colour;
+
+    min-height: 300px;
+    @media (max-width: 500px) {
+      min-height: 250px;
+    }
+
+    h2 {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    #name {
+      font-size: 2rem;
+    }
+
+    .holding-drink-container {
+      display: flex;
+      flex-wrap: wrap;
+      overflow: hidden; 
+    }
+    .button-holder {
+      display:flex;
+      justify-content: center;
+      align-items: center;
+    }
   }
 
   #holding-drink {
     width: 30px;
+  }
+}
+
+.voting-result {
+  font-size: 3rem;
+}
+
+.button-game-container {
+  gap: 20px;
+  margin-top: 0.5rem;
+
+  .scoreboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    background-color: #f4f4f4;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px 0px;
+
+    @media (max-width: 600px) {
+      padding: 5px;
+    }
+
+    .player-score {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 10px 20px;
+      background-color: #ffffff; /* Background color for individual player scores */
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+      @media (max-width: 600px) {
+        padding: 0px;
+      }
+      
+      h1, p {
+        text-align: center;
+        width: 100%;
+        font-family: 'Press Start 2P', system-ui;
+        color: #212031
+      }
+      p {
+        line-height: 1.5rem;
+        @media (max-width: 600px) {
+          font-size: 0.75rem;
+        }
+        
+      }
+
+      h1 {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 1.25rem;
+        @media (max-width: 800px) {
+          font-size: 0.8rem;
+        }
+        @media (max-width: 500px) {
+          font-size: 0.8rem;
+        }
+        @media (max-width: 1000px) {
+          font-size: 1.2rem;
+        }
+        @media (min-width: 1500px) {
+          font-size: 2.5rem;
+        }
+      }
+    }
+  }
+  .player-score-and-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    #score {
+      font-size: 3rem;
+      font-family: 'Press Start 2P', system-ui;
+    }
+  }
+
+  .button-game-button {
+    background: #ea6262;
+    border-top: 1px solid #8c3838;
+    border-right: 1px solid #4d1f1f;
+    border-bottom: 1px solid #331515;
+    border-left: 1px solid #4d1f1f;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 1px 10px 1px #ee5c5c, 0px 1px 0 #4d1d1d, 0 6px 0px #531f1f, 0 8px 4px 1px #111111;
+    -moz-box-shadow: inset 0 1px 10px 1px #ee5c5c, 0px 1px 0 #4d1d1d, 0 6px 0px #531f1f, 0 8px 4px 1px #111111;
+    box-shadow: inset 0 1px 10px 1px #ee5c5c, 0px 1px 0 #4d1d1d, 0 6px 0px #531f1f, 0 8px 4px 1px #111111;
+    color: #fff;
+    line-height: 1;
+    padding: 10px 0 12px 0;
+    text-align: center;
+    text-shadow: 0px -1px 1px #4d1e1e;
+    width: 150px;
+    font-size: 22px;
+      
+    &:hover {
+      -webkit-box-shadow: inset 0 0px 20px 1px #ff8787, 0px 1px 0 #4d1d1d, 0 6px 0px #531f1f, 0 8px 4px 1px #111111;
+      -moz-box-shadow: inset 0 0px 20px 1px #ff8787, 0px 1px 0 #4d1d1d, 0 6px 0px #531f1f, 0 8px 4px 1px #111111;
+      box-shadow: inset 0 0px 20px 1px #ff8787, 0px 1px 0 #4d1d1d, 0 6px 0px #531f1f, 0 8px 4px 1px #111111;
+      cursor: pointer;
+    }
+    &:active {
+      -webkit-box-shadow: inset 0 1px 10px 1px #ee5c5c, 0 1px 0 #4d1d1d, 0 2px 0 #531f1f, 0 4px 3px 0 #111111;
+      -moz-box-shadow: inset 0 1px 10px 1px #ee5c5c, 0 1px 0 #4d1d1d, 0 2px 0 #531f1f, 0 4px 3px 0 #111111;
+      box-shadow: inset 0 1px 10px 1px #ee5c5c, 0 1px 0 #4d1d1d, 0 2px 0 #531f1f, 0 4px 3px 0 #111111;
+      transform: translateY(4px);
+    }
   }
 }

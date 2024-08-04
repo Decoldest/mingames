@@ -8,6 +8,8 @@ import Voting from "./Voting";
 import HotPotato from "./games/HotPotato";
 import { socket } from "../socket";
 import ButtonPress from "./games/ButtonPress";
+import '@fontsource/press-start-2p';
+import '@fontsource/share-tech-mono';
 import "./GameMain.scss";
 
 GameMain.propTypes = {
@@ -38,7 +40,7 @@ export default function GameMain({ isPartyLeader, state, setState }) {
     },
     "Hot Potato": {
       component: HotPotato,
-      description: `It's literally hot potato. People who have a potato at the end of the game drink.`,
+      description: `It's literally hot potato. The person with a potato at the end of the game drinks.`,
       emoji: "🥔",
     },
     "Button Press": {
@@ -192,7 +194,7 @@ export default function GameMain({ isPartyLeader, state, setState }) {
         )
       ) : (
         <div className="game-buttons-container">
-          {isPartyLeader ? <h2>Choose a game</h2> : <h2>Games</h2>}
+          {isPartyLeader ? <h2>Choose A Game 🕹️</h2> : <h2>Games 🕹️</h2>}
 
           <div className="game-buttons-grid">
             {Object.keys(games).map((game) => (

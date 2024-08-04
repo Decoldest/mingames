@@ -70,30 +70,38 @@ export default function Wager({ roomID }) {
       {doneWagering ? (
         <h2>Waiting for other players...</h2>
       ) : (
-        <div>
-          <h2>How many drinks do you wager?</h2>
-          <div className="wager-buttons-container">
-            <button onClick={handleDecrement} className="wager-button">
-              <FaCircleMinus color="white" size={30}/>
-            </button>
-            <input
-              type="number"
-              value={wager}
-              onChange={(e) => {
-                setWager(e.target.value);
-                setWarning(null);
-              }}
-              readOnly
-              placeholder="Enter number of drinks"
-              className="my-6"
-            />
-            <button onClick={handleIncrement} className="wager-button">
-              <FaCirclePlus color="white" size={30}/>
-            </button>
+        <>
+          <div>
+            <h2>How many drinks do you wager?</h2>
+            <div className="flex flex-col items-start px-6">
+              <div className="flex flex-col items-center">
+                <div className="wager-buttons-container">
+                  <button onClick={handleDecrement} className="wager-button">
+                    <FaCircleMinus color="white" size={30} />
+                  </button>
+                  <input
+                    type="number"
+                    value={wager}
+                    onChange={(e) => {
+                      setWager(e.target.value);
+                      setWarning(null);
+                    }}
+                    readOnly
+                    placeholder="Enter number of drinks"
+                    className="my-6"
+                  />
+                  <button onClick={handleIncrement} className="wager-button">
+                    <FaCirclePlus color="white" size={30} />
+                  </button>
+                </div>
+                <button onClick={handleWager} className="game-button">
+                  Place Wager
+                </button>
+              </div>
+            </div>
+
+            {warning && <div className="warning">{warning}</div>}
           </div>
-          <button onClick={handleWager} className="game-button">
-            Place Wager
-          </button>
           <div className="drinks-grid">
             {selectedDrinks.map((drink, i) => (
               <img
@@ -104,8 +112,7 @@ export default function Wager({ roomID }) {
               />
             ))}
           </div>
-          {warning && <div className="warning">{warning}</div>}
-        </div>
+        </>
       )}
     </section>
   );

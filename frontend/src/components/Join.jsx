@@ -1,7 +1,9 @@
 import PropTypes from "prop-types";
 import { useState, useEffect } from "react";
+import '@fontsource/caveat-brush';
 import "./Join.scss";
 import back from "../assets/back.svg";
+
 
 Join.propTypes = {
   creatingRoom: PropTypes.bool,
@@ -55,7 +57,7 @@ export default function Join({
       <h1 className="title">Booze Bash</h1>
       <p>{`I hope you're thirsty`}</p>
       {!creatingRoom ? (
-        <div className="flex flex-col gap-6 md:gap-16 w-full ">
+        <div className="flex flex-col gap-4 md:gap-10 w-full ">
           <NameTag
             username={username}
             usernameHandler={usernameHandler}

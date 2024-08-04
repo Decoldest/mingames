@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@fontsource/caveat-brush": "^5.0.13",
+    "@fontsource/press-start-2p": "^5.0.20",
+    "@fontsource/share-tech-mono": "^5.0.12",
     "@react-spring/web": "^9.7.3",
     "he": "^1.2.0",
     "phaser": "^3.80.1",
