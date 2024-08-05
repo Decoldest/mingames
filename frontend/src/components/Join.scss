@@ -27,7 +27,7 @@ $join-input-border: #6a2500;
 
   .tag {
     text-align: center;
-    background-color: red;
+    background-color: rgb(233, 3, 3);
     padding: 20px 0px;
     border-radius: 30px;
     border: 4px solid white;
@@ -55,9 +55,9 @@ $join-input-border: #6a2500;
   }
 
   .error {
-    color: red;
-    font-size: 1rem;
+    font-size: 1.5rem;
     margin-top: 1rem;
+    color: rgb(238, 238, 238)
   }
 }
 

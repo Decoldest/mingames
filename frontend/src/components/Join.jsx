@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import '@fontsource/caveat-brush';
 import "./Join.scss";
 import back from "../assets/back.svg";
@@ -29,6 +29,7 @@ export default function Join({
   roomHandler,
 }) {
   const [view, setView] = useState("landing");
+  const errorRef = useRef(null);
 
   const handleBack = () => {
     setView("landing");
@@ -51,6 +52,13 @@ export default function Join({
       window.removeEventListener("popstate", handlePopState);
     };
   }, []);
+
+  useEffect(() => {
+    if (error) {
+      errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [error]);
+
 
   return (
     <section className="join flex flex-col items-center justify-start">
@@ -132,8 +140,8 @@ export default function Join({
         </div>
       )}
 
-      {error && <div className="error">{error}</div>}
-    </section>
+{error && <div ref={errorRef} className="error">{error}</div>}
+</section>
   );
 }
 
