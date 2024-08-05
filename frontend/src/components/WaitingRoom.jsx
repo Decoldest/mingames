@@ -15,8 +15,10 @@ export default function WaitingRoom({ isPartyLeader }) {
   const { username } = useContext(UserContext);
   const [messageInput, setMessageInput] = useState("");
   const [messages, setMessages] = useState([]);
+  const [copySuccess, setCopySuccess] = useState("");
   const messageContainerRef = useRef(null);
   const navigate = useNavigate();
+  const link = `${window.location.origin}/${roomID}`;
 
   useEffect(() => {
     const addMessage = (message) => {
@@ -63,6 +65,13 @@ export default function WaitingRoom({ isPartyLeader }) {
     socket.emit("initiate-game", roomID);
   };
 
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(link).then(() => {
+      setCopySuccess("Link copied!");
+      setTimeout(() => setCopySuccess(""), 2000);
+    });
+  };
+
   useEffect(() => {
     if (messageContainerRef.current) {
       messageContainerRef.current.scrollTop =
@@ -74,6 +83,8 @@ export default function WaitingRoom({ isPartyLeader }) {
     <section className="wait flex justify-center gap-10">
       <div className="info-container">
         <h1 className="title">Booze Bash</h1>
+        <p>Click below to copy room link</p>
+        <button onClick={copyToClipboard} className="copy-link">{copySuccess ? "Copied Link!" : link}</button>
         <h1>{roomID}</h1>
         <p className="mb-4">Waiting for players to join...</p>
         {isPartyLeader ? (

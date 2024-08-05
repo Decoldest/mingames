@@ -25,6 +25,15 @@ $input-container-colour: rgb(249, 245, 245);
     }
   }
 
+  .copy-link {
+    background: none;
+    cursor: pointer;
+    border: none;
+    color:rgb(238, 238, 238);
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+  }
+
   .input-container {
     padding: 1rem;
     display: flex;
