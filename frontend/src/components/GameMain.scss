@@ -161,23 +161,13 @@ $game-background-colour:#253C78;
   }
 
   .wager-buttons-container {
-    width: 200px;
+    width: 175px;
     display: flex;
-    justify-content: space-evenly;
+    align-items: center;
+    justify-content: space-between;
 
-    input { 
-      background: none;
-      border: none;
-      font-size: 2rem;
-      width: 50px;
-      color: $light-colour;
-      text-align: center;
-      letter-spacing: -5px;
-  
-      &:focus {
-        border: none;
-        outline: none;
-      }
+    h1 {
+      font-weight: 400;
     }
 
     .wager-button {
@@ -443,5 +433,38 @@ h2.timer {
       box-shadow: inset 0 1px 10px 1px #ee5c5c, 0 1px 0 #4d1d1d, 0 2px 0 #531f1f, 0 4px 3px 0 #111111;
       transform: translateY(4px);
     }
+  }
+}
+
+
+.race-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+
+  .squirtle-sprite {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+  .squirtle-name {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap:10px;
+    input{ 
+      height: 40px;
+      width: 200px;
+      font-size: 1.2rem;
+    }
+  }
+  span {
+    line-height: 2rem;
   }
 }

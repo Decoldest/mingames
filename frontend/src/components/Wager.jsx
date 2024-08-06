@@ -79,17 +79,7 @@ export default function Wager({ roomID }) {
                   <button onClick={handleDecrement} className="wager-button">
                     <FaCircleMinus color="white" size={30} />
                   </button>
-                  <input
-                    type="number"
-                    value={wager}
-                    onChange={(e) => {
-                      setWager(e.target.value);
-                      setWarning(null);
-                    }}
-                    readOnly
-                    placeholder="Enter number of drinks"
-                    className="my-6"
-                  />
+                  <h1 className="my-6">{wager}</h1>
                   <button onClick={handleIncrement} className="wager-button">
                     <FaCirclePlus color="white" size={30} />
                   </button>

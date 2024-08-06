@@ -44,17 +44,19 @@ export default function Race({
   };
 
   return (
-    <>
+    <div className="race-container">
       {!isNamed ? (
         <div className="squirtle-sprite">
-          <h2>Name your squirtle</h2>
-          <img
-            src={squirtleMain}
-            alt="Squirtle Sprite"
-            height={"100px"}
-            className="squirtle-sprite"
-          />
+          <h1>Name Your Squirtle</h1>
           <div>
+            <img
+              src={squirtleMain}
+              alt="Squirtle Sprite"
+              height={"100px"}
+              className="squirtle-sprite"
+            />
+          </div>
+          <div className="squirtle-name">
             <input
               type="text"
               value={name}
@@ -64,7 +66,7 @@ export default function Race({
               }}
               disabled={isInputDisabled}
             />
-            <button onClick={() => submitSquirtleName()}>Done</button>
+            <button onClick={() => submitSquirtleName()} className="game-button">Done</button>
           </div>
           <span>
             Note: On smaller screens the display will be rotated to landscape.
@@ -77,6 +79,6 @@ export default function Race({
           <SquirtleRace data={{ gameData, roomID }} />
         </div>
       )}
-    </>
+    </div>
   );
 }
