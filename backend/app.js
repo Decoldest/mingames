@@ -25,7 +25,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(compression());
 
 const corsOptions = {
-  origin: process.env.CLIENT_URL || "http://localhost:5173/",
+  origin: process.env.CLIENT_URL,
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
