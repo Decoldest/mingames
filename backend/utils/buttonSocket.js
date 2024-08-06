@@ -1,5 +1,5 @@
 const Room = require("../models/room");
-const MAX_TIMER = 600;
+const MAX_TIMER = 60000;
 const TIMER_INTERVAL = 100;
 
 const { handleButtonPressVoting } = require("./votingSocket");

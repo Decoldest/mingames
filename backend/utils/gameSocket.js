@@ -42,7 +42,6 @@ const handleAfterVotingDone = async (socket, io, roomID) => {
   const { selectedGame } = room.state;
 
   if (allPlayersReady) {
-    console.log("All players are done drinking");
     switch (selectedGame) {
       case "Trivia":
         await setNextTriviaQuestion(room, continueGame, endGame);
@@ -65,6 +64,7 @@ const handlePlayerJoiningLate = async (room, username, socketID) => {
   const { selectedGame, gameData, votingData, isWagering } = room.state;
   let addedGameData;
   let addedVotingData = null;
+  
 
   // Update room game data
   if (selectedGame === "Hot Potato") {
@@ -74,7 +74,7 @@ const handlePlayerJoiningLate = async (room, username, socketID) => {
   }
 
   //Will set the wager property if a game is being played
-  if (gameData) {
+  if (gameData && !isWagering) {
     await Player.findOneAndUpdate(
       {
         socketID: socketID,

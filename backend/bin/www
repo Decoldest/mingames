@@ -176,13 +176,17 @@ io.on("connection", (socket) => {
         const updatedData = await handlePlayerJoiningLate(
           updatedRoom,
           username,
-          socket.id
+          socket.id,
         );
 
         //Change frontend state to match database
         callback({ success: true, state: updatedData.state });
 
-        io.to(roomID).emit("late-player-data", updatedData.addedGameData, updatedData.addedVotingData);
+        io.to(roomID).emit(
+          "late-player-data",
+          updatedData.addedGameData,
+          updatedData.addedVotingData,
+        );
 
         process.nextTick(() => {
           io.to(roomID).emit("joined-room", username);
@@ -281,7 +285,7 @@ io.on("connection", (socket) => {
       }
 
       const allPlayersWagered = room.players.every(
-        (player) => player.wager >= 0,
+        (player) => player.wager !== -1,
       );
 
       //Let all players know wagers placed
@@ -356,7 +360,9 @@ const handlePlayerLeaving = async (io, socket) => {
       return;
     }
 
-    const room = await Room.findOne({ players: disconnectedPlayer._id });
+    const room = await Room.findOne({
+      players: disconnectedPlayer._id,
+    }).populate("players");
 
     //Delete player then remove that player from the room
     await Player.findByIdAndDelete(disconnectedPlayer._id);
@@ -372,17 +378,30 @@ const handlePlayerLeaving = async (io, socket) => {
     io.to(room.code).emit("left-room", disconnectedPlayer.username);
 
     //Delete room if no players
-    if (updatedRoom.players.length === 0) {
+    if (updatedRoom.players.length <= 0) {
       await Room.findByIdAndDelete(room._id);
       console.log(
         `Room ${room._id} deleted because there are no players left.`,
       );
       io.to(room.code).emit("return-main");
+    } else {
+      // Create new party leader
+      createNewPartyLeader(io, updatedRoom.players);
     }
   } catch (error) {
     console.error("Error handling disconnect: ", error);
   }
 };
+
+async function createNewPartyLeader(io, players) {
+  const newPartyLeader = await Player.findOneAndUpdate(
+    { _id: players[0]._id },
+    { isPartyLeader: true },
+    { new: true },
+  );
+
+  io.to(newPartyLeader.socketID).emit("make-party-leader");
+}
 
 function prepareGameData(io, roomID, room, game) {
   if (game === "Trivia") {

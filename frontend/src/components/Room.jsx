@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import UserContext from "./UserContext";
 import WaitingRoom from "./WaitingRoom";
 import GameMain from "./GameMain";
@@ -10,32 +10,21 @@ export default function Room() {
   const { roomID } = useParams();
   const location = useLocation();
   const { username, setUsername } = useContext(UserContext);
-
-  console.log("Location state:", location.state);
+  const navigate = useNavigate();
 
   const { isPartyLeader } = location.state || false;
   const [error, setError] = useState(null);
   const [state, setState] = useState({
     waiting: location.state?.waiting || false,
     playing: location.state?.playing || false,
-    isWagering: location.state?.isWagering ||false,
+    isWagering: location.state?.isWagering || false,
     selectedGame: location.state?.selectedGame || null,
     gameData: location.state?.gameData || null,
-    votingData: location.state?.votingData ||null,
+    votingData: location.state?.votingData || null,
     waitingMessage: "",
   });
-  
 
   const { waiting, playing } = state;
-
-  useEffect(() => {
-    console.log("Initial state:", state);
-  }, [state]);
-
-  // Use effect to log the state whenever it changes
-  useEffect(() => {
-    console.log("Updated state:", state);
-  }, [state]);
 
   useEffect(() => {
     // Event handlers for socket events
@@ -49,6 +38,7 @@ export default function Room() {
 
     const handleDisconnect = () => {
       console.log("Disconnected from server");
+      navigate("/");
     };
 
     const handleStartGame = () => {
