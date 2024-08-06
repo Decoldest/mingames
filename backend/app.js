@@ -3,11 +3,13 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
+require("dotenv").config();
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 const compression = require("compression");
 const helmet = require("helmet");
+const cors = require('cors');
 
 var app = express();
 
@@ -21,6 +23,14 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(compression());
+
+const corsOptions = {
+  origin: process.env.CLIENT_URL || "http://localhost:5173/",
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
 
 // Add helmet to the middleware chain.
 app.use(
