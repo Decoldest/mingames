@@ -374,6 +374,7 @@ const handlePlayerLeaving = async (io, socket) => {
       },
       { new: true },
     );
+    console.log(disconnectedPlayer.username, "left");
 
     io.to(room.code).emit("left-room", disconnectedPlayer.username);
 
