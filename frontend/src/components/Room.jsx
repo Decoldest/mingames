@@ -12,7 +12,9 @@ export default function Room() {
   const { username, setUsername } = useContext(UserContext);
   const navigate = useNavigate();
 
-  const { isPartyLeader } = location.state || false;
+  const [isPartyLeader, setIsPartyLeader] = useState(
+    location.state?.isPartyLeader || false,
+  );
   const [error, setError] = useState(null);
   const [state, setState] = useState({
     waiting: location.state?.waiting || false,
@@ -49,11 +51,17 @@ export default function Room() {
       }));
     };
 
+    const makePartyLeader = () => {
+      console.log("New party leader");
+      setIsPartyLeader(true);
+    };
+
     // Register socket event listeners
     socket.on("connect", handleConnect);
     socket.on("error", handleError);
     socket.on("start-game", handleStartGame);
     socket.on("disconnect", handleDisconnect);
+    socket.on("make-party-leader", makePartyLeader);
 
     // Cleanup function to remove event listeners on unmount
     return () => {
@@ -61,14 +69,15 @@ export default function Room() {
       socket.off("error", handleError);
       socket.off("start-game", handleStartGame);
       socket.off("disconnect", handleDisconnect);
+      socket.off("make-party-leader", makePartyLeader);
 
       //send socket event
       socket.emit("leave-room");
     };
-  }, []);
+  }, [navigate]);
 
   const handleJoinRoom = () => {
-    if (username === "") {
+    if (!username.trim()) {
       setError("Please enter a username");
       return;
     }

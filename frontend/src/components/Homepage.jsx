@@ -60,7 +60,7 @@ export default function Homepage() {
   };
 
   const handleJoinRoom = () => {
-    if (username === "") {
+    if (username.trim() === "") {
       setError("Please enter a username");
       return;
     }
@@ -89,8 +89,8 @@ export default function Homepage() {
   };
 
   const roomHandler = (roomID) => {
-    setRoomID(roomID)
-  }
+    setRoomID(roomID);
+  };
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center gap-6 sm:gap-10">
@@ -105,7 +105,7 @@ export default function Homepage() {
         roomID={roomID}
         roomHandler={roomHandler}
       />
-      <HowToPlay/>
+      <HowToPlay />
     </main>
   );
 }
