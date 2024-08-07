@@ -2,9 +2,9 @@ const Room = require("../models/room");
 const COUNTDOWN_DURATION = 6000;
 const COUNTDOWN_INTERVAL = 1000;
 const squirtleRaceUpdateInterval = 5000;
-const MAX_SPEED = 50;
+const MAX_SPEED = 70;
 const MIN_SPEED = 30;
-const INITIAL_X = 100;
+const INITIAL_X = 150;
 
 const { handleRaceWinnerVoting } = require("./votingSocket");
 
@@ -173,8 +173,7 @@ const updateWinnerAndLosers = async (trainer, roomID, io) => {
 
   // Wait 2 seconds before starting voting process
   setTimeout(function () {
-    
-    eWinnerVoting(io, roomID, drinkData);
+    handleRaceWinnerVoting(io, roomID, drinkData);
   }, 3000);
 };
 
