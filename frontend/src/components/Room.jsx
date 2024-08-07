@@ -4,6 +4,7 @@ import UserContext from "./UserContext";
 import WaitingRoom from "./WaitingRoom";
 import GameMain from "./GameMain";
 import Join from "./Join";
+import Footer from "../Footer";
 import { socket } from "../socket";
 
 export default function Room() {
@@ -105,26 +106,29 @@ export default function Room() {
   };
 
   return (
-    <main className="min-h-screen flex items-start justify-center pt-5 sm:pt-20">
-      {waiting ? (
-        <WaitingRoom username={username} isPartyLeader={isPartyLeader} />
-      ) : playing ? (
-        <GameMain
-          isPartyLeader={isPartyLeader}
-          state={state}
-          setState={setState}
-        />
-      ) : (
-        <Join
-          creatingRoom={false}
-          handleJoinRoom={handleJoinRoom}
-          error={error}
-          errorHandler={errorHandler}
-          username={username}
-          usernameHandler={usernameHandler}
-          roomID={roomID}
-        />
-      )}
+    <main className="flex flex-col items-center justify-center">
+      <div className="min-h-screen flex items-start justify-center pt-5 sm:pt-20">
+        {waiting ? (
+          <WaitingRoom username={username} isPartyLeader={isPartyLeader} />
+        ) : playing ? (
+          <GameMain
+            isPartyLeader={isPartyLeader}
+            state={state}
+            setState={setState}
+          />
+        ) : (
+          <Join
+            creatingRoom={false}
+            handleJoinRoom={handleJoinRoom}
+            error={error}
+            errorHandler={errorHandler}
+            username={username}
+            usernameHandler={usernameHandler}
+            roomID={roomID}
+          />
+        )}
+      </div>
+      <Footer />
     </main>
   );
 }

@@ -113,3 +113,29 @@ canvas {
     font-size: 1rem;
   }
 }
+
+.footer-content {
+  color: $main-text-colour;
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  margin-bottom: 10px;
+  @media (max-width: 400px) {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  a {
+    text-decoration: none;
+    color: $main-text-colour;
+  }
+  .social-media {
+    display: flex;
+    gap: 10px;
+  }
+}
+
+.disclaimer {
+  margin: none;
+  font-size: 0.8rem;
+}

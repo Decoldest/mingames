@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Join from "./Join";
+import Footer from "../Footer";
 import UserContext from "./UserContext";
 import { socket } from "../socket";
 import HowToPlay from "./HowToPlay";
@@ -106,6 +107,8 @@ export default function Homepage() {
         roomHandler={roomHandler}
       />
       <HowToPlay />
+      <p className="disclaimer">Please Drink Responsibly</p>
+      <Footer />
     </main>
   );
 }

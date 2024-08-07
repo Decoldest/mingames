@@ -1,7 +1,7 @@
 import Homepage from "./components/Homepage";
 import Room from "./components/Room";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { UserProvider } from "./components/UserContext"
+import { UserProvider } from "./components/UserContext";
 
 function App() {
   return (

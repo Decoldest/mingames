@@ -84,7 +84,7 @@ export default function WaitingRoom({ isPartyLeader }) {
       <div className="info-container">
         <h1 className="title">Booze Bash</h1>
         <p>Click below to copy room link</p>
-        <div className="link-container"><button onClick={copyToClipboard} className="copy-link">{copySuccess ? "Copied Link!" : `${link} sfasdfdfdfgdsfgfgsdfgdsfsdfsasdasdfsdfasf`}</button></div>
+        <div className="link-container"><button onClick={copyToClipboard} className="copy-link">{copySuccess ? "Copied Link!" : `${link}`}</button></div>
         <h1>{roomID}</h1>
         <p className="mb-4">Waiting for players to join...</p>
         {isPartyLeader ? (
