@@ -106,7 +106,7 @@ export default function Room() {
   };
 
   return (
-    <main className="flex flex-col items-center justify-center">
+    <main className="flex flex-col">
       <div className="min-h-screen flex items-start justify-center pt-5 sm:pt-20">
         {waiting ? (
           <WaitingRoom username={username} isPartyLeader={isPartyLeader} />

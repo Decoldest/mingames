@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import UserContext from "./UserContext";
 import { socket } from "../socket";
 import { useNavigate } from "react-router-dom";
+import crown from "../assets/crown.png";
 import "./WaitingRoom.scss";
 
 WaitingRoom.propTypes = {
@@ -15,6 +16,7 @@ export default function WaitingRoom({ isPartyLeader }) {
   const { username } = useContext(UserContext);
   const [messageInput, setMessageInput] = useState("");
   const [messages, setMessages] = useState([]);
+  const [players, setPlayers] = useState([]);
   const [copySuccess, setCopySuccess] = useState("");
   const messageContainerRef = useRef(null);
   const navigate = useNavigate();
@@ -25,12 +27,14 @@ export default function WaitingRoom({ isPartyLeader }) {
       setMessages((prevMessages) => [...prevMessages, message]);
     };
 
-    const handleJoinedRoom = (username) => {
+    const handleJoinedRoom = (username, playerList) => {
       addMessage(`${username} joined`);
+      setPlayers(playerList);
     };
 
-    const handleLeftRoom = (username) => {
+    const handleLeftRoom = (username, playerList) => {
       addMessage(`${username} left`);
+      setPlayers(playerList);
     };
 
     const handleReceiveMessage = (message, username) => {
@@ -52,7 +56,7 @@ export default function WaitingRoom({ isPartyLeader }) {
       socket.off("receive-message", handleReceiveMessage);
       socket.off("return-main", returnToHome);
     };
-  }, [navigate]);
+  }, [navigate, players]);
 
   const sendMessage = () => {
     if (messageInput.trim() !== "") {
@@ -84,9 +88,12 @@ export default function WaitingRoom({ isPartyLeader }) {
       <div className="info-container">
         <h1 className="title">Booze Bash</h1>
         <p>Click below to copy room link</p>
-        <div className="link-container"><button onClick={copyToClipboard} className="copy-link">{copySuccess ? "Copied Link!" : `${link}`}</button></div>
+        <div className="link-container">
+          <button onClick={copyToClipboard} className="copy-link">
+            {copySuccess ? "Copied Link!" : `${link}`}
+          </button>
+        </div>
         <h1>{roomID}</h1>
-        <p className="mb-4">Waiting for players to join...</p>
         {isPartyLeader ? (
           <button onClick={() => setGameStart()} className="main-button">
             Start Game
@@ -94,6 +101,21 @@ export default function WaitingRoom({ isPartyLeader }) {
         ) : (
           <h4>Party leader will start the game</h4>
         )}
+        <div className="players-container mt-10">
+          <h2>Players</h2>
+          <div className="username-grid">
+            {players.map((player) => (
+              <div key={player._id} className="username">
+                {player.isPartyLeader && (
+                  <div>
+                    <img src={crown} alt="Crown Icon" />
+                  </div>
+                )}
+                <p>{player.username}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
       <div className="input-container">
         <div className="message-container" ref={messageContainerRef}>
