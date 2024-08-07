@@ -1,7 +1,7 @@
 const Room = require("../models/room");
 const { handlePotatoWinnerVoting } = require("./votingSocket");
 
-const MAX_TIMER = 60000;
+const MAX_TIMER = 600;
 const TIMER_INTERVAL = 100;
 
 const sendPlayers = async (io, roomID, room) => {
@@ -51,11 +51,14 @@ const startPotatoTimer = (io, roomID) => {
 
   // Set interval to emit timer
   const timerID = setInterval(() => {
-    io.to(roomID).emit("timer", (timer / 10).toFixed(1));
+    const timeLeft = ((timer * TIMER_INTERVAL) / 1000).toFixed(1);
+    io.to(roomID).emit("timer", timeLeft);
+
     timer--;
+
     if (timer <= 0) {
       clearInterval(timerID);
-      endHotPotato(io, roomID);
+      endButtonGame(io, roomID);
     }
   }, TIMER_INTERVAL);
 };
