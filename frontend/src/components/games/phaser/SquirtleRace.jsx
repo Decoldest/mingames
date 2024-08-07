@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { socket } from "../../../socket";
 import PropTypes from "prop-types";
 import Countdown from "./Countdown";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 class RaceMain extends Phaser.Scene {
   constructor() {
@@ -169,6 +169,8 @@ SquirtleRace.propTypes = {
 };
 
 export default function SquirtleRace({ data }) {
+  const gameRef = useRef(null);
+
   useEffect(() => {
     const config = {
       type: Phaser.AUTO,
@@ -203,6 +205,7 @@ export default function SquirtleRace({ data }) {
     };
     const game = new Phaser.Game(config);
     game.scene.add("RaceMain", RaceMain, true, data);
+    gameRef.current = game;
 
     // Show orientation change on small screens credit - Tajammal Maqbool
     const OnChangeScreen = () => {
@@ -236,6 +239,10 @@ export default function SquirtleRace({ data }) {
     });
 
     return () => {
+      if (gameRef.current) {
+        gameRef.current.destroy(true);
+      }
+
       _orientation.removeEventListener("change", OnChangeScreen);
       window.removeEventListener("resize", OnChangeScreen);
     };
