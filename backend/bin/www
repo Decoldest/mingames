@@ -43,7 +43,7 @@ mongoose
  */
 const io = require("socket.io")(server, {
   cors: {
-    origin: '*',
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
@@ -123,10 +123,8 @@ io.on("connection", (socket) => {
 
       //Send joined message
       process.nextTick(() => {
-        io.to(roomID).emit("joined-room", username);
+        io.to(roomID).emit("joined-room", username, [player]);
       });
-
-      console.log(`Room ${roomID} created with player ${username}`);
     } catch (err) {
       console.error("Error creating room: ", err);
     }
@@ -164,7 +162,10 @@ io.on("connection", (socket) => {
             $push: { players: player._id },
           },
           { new: true },
-        );
+        ).populate({
+          path: "players",
+          select: "username isPartyLeader",
+        });
 
         if (!updatedRoom) {
           socket.emit("error", "Room not found");
@@ -190,7 +191,7 @@ io.on("connection", (socket) => {
         );
 
         process.nextTick(() => {
-          io.to(roomID).emit("joined-room", username);
+          io.to(roomID).emit("joined-room", username, updatedRoom.players);
         });
 
         console.log(`Player ${username} joined room ${roomID}`);
@@ -377,8 +378,6 @@ const handlePlayerLeaving = async (io, socket) => {
     );
     console.log(disconnectedPlayer.username, "left");
 
-    io.to(room.code).emit("left-room", disconnectedPlayer.username);
-
     //Delete room if no players
     if (updatedRoom.players.length <= 0) {
       await Room.findByIdAndDelete(room._id);
@@ -388,7 +387,18 @@ const handlePlayerLeaving = async (io, socket) => {
       io.to(room.code).emit("return-main");
     } else {
       // Create new party leader
-      createNewPartyLeader(io, updatedRoom.players);
+      await createNewPartyLeader(io, updatedRoom.players);
+
+      const roomWithNewLeader = await Room.findById(room._id).populate({
+        path: "players",
+        select: "username isPartyLeader",
+      });
+
+      io.to(room.code).emit(
+        "left-room",
+        disconnectedPlayer.username,
+        roomWithNewLeader.players,
+      );
     }
   } catch (error) {
     console.error("Error handling disconnect: ", error);
