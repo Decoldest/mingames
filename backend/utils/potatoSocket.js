@@ -51,14 +51,14 @@ const startPotatoTimer = (io, roomID) => {
 
   // Set interval to emit timer
   const timerID = setInterval(() => {
-    const timeLeft = ((timer * TIMER_INTERVAL) / 1000).toFixed(1);
+    const timeLeft = (timer * TIMER_INTERVAL / 1000).toFixed(1);
     io.to(roomID).emit("timer", timeLeft);
 
     timer--;
 
     if (timer <= 0) {
       clearInterval(timerID);
-      endButtonGame(io, roomID);
+      endHotPotato(io, roomID);
     }
   }, TIMER_INTERVAL);
 };
