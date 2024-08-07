@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import squirtleMain from "./phaser/squirtleMain.gif";
 import { socket } from "../../socket";
@@ -22,6 +22,7 @@ export default function Race({
   const [name, setName] = useState("");
   const [isInputDisabled, setIsInputDisabled] = useState(false);
   const { username } = useContext(UserContext);
+  const squirtleRaceRef = useRef(null);
 
   useEffect(() => {
     const handleAllSquirtlesIn = () => {
@@ -33,6 +34,12 @@ export default function Race({
       socket.off("squirtle-squad-in", handleAllSquirtlesIn);
     };
   }, [gameData]);
+
+  useEffect(() => {
+    if (isNamed && squirtleRaceRef.current) {
+      squirtleRaceRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [isNamed]);
 
   const submitSquirtleName = () => {
     socket.emit("add-squirtle", name, username, roomID, (response) => {
@@ -66,7 +73,12 @@ export default function Race({
               }}
               disabled={isInputDisabled}
             />
-            <button onClick={() => submitSquirtleName()} className="game-button">Done</button>
+            <button
+              onClick={() => submitSquirtleName()}
+              className="game-button"
+            >
+              Done
+            </button>
           </div>
           <span>
             Note: On smaller screens the display will be rotated to landscape.
@@ -75,7 +87,7 @@ export default function Race({
         </div>
       ) : (
         // Rotate on smaller screens
-        <div className={"h-screen w-screen"}>
+        <div className={"h-screen w-screen"} ref={squirtleRaceRef}>
           <SquirtleRace data={{ gameData, roomID }} />
         </div>
       )}
