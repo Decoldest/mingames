@@ -135,6 +135,13 @@ io.on("connection", (socket) => {
     try {
       const room = await Room.findOne({ code: roomID });
 
+      if (room.state.selectedGame && room.state.selectedGame === "Race") {
+        socket.emit(
+          "error",
+          "Room is currently in a racing game. Please join after the race is finished",
+        );
+        return;
+      }
       // Room is available to join
       if (room) {
         // Check if username already exists in the room
@@ -325,8 +332,8 @@ io.on("connection", (socket) => {
     addRacerSquirtle(socket, io, squirtle, username, roomID, callback);
   });
 
-  socket.on("won-race", async (squirtle, roomID) => {
-    squirtleWon(roomID, io, squirtle);
+  socket.on("won-race", async (squirtle, roomID, racing) => {
+    squirtleWon(roomID, io, squirtle, racing);
   });
 
   socket.on("give-potato", async (roomID, username, receiver) => {

@@ -1,10 +1,12 @@
 const Room = require("../models/room");
 const COUNTDOWN_DURATION = 6000;
 const COUNTDOWN_INTERVAL = 1000;
-const squirtleRaceUpdateInterval = 5000;
-const MAX_SPEED = 70;
-const MIN_SPEED = 30;
+const squirtleRaceUpdateInterval = 100;
+// const MAX_SPEED = 70;
+// const MIN_SPEED = 30;
 const INITIAL_X = 150;
+const MIN_STEP = 1;
+const MAX_STEP = 5;
 
 const { handleRaceWinnerVoting } = require("./votingSocket");
 
@@ -20,7 +22,7 @@ const addRacerSquirtle = async (
     if (!squirtle) {
       return callback({
         success: false,
-        message: "Please enter a name.",
+        message: "Please enter a name",
       });
     }
 
@@ -31,7 +33,7 @@ const addRacerSquirtle = async (
       trainer,
       id: socket.id,
       x: INITIAL_X,
-      y: Math.floor(Math.random() * (600 - 100)) + 100,
+      y: Math.floor(Math.random() * (690 - 100)) + 100,
     };
 
     // Initialize gameData if it's null
@@ -97,8 +99,14 @@ const startCountDown = async (room, roomID, io) => {
 //Start race by emmiting starting velocities
 const startSquirtleRace = async (racers, roomID, room, io) => {
   //Immediately send velocities
-  let velocities = generateRandVelocities(racers);
-  io.to(roomID).emit("setVelocities", velocities);
+  // let velocities = generateRandVelocities(racers);
+  // io.to(roomID).emit("setVelocities", velocities);
+  io.to(roomID).emit("walk");
+
+  let positions = racers.reduce((acc, racer) => {
+    acc[racer.id] = racer.x;
+    return acc;
+  }, {});
 
   //Save isRacing in state to check if updates should be sent
   room.state.gameData.isRacing = true;
@@ -111,27 +119,40 @@ const startSquirtleRace = async (racers, roomID, room, io) => {
       return;
     }
 
-    const velocities = generateRandVelocities(racers);
+    // const velocities = generateRandVelocities(racers);
+    positions = generateRandomStep(positions);
 
-    io.to(roomID).emit("setVelocities", velocities);
+    // io.to(roomID).emit("setVelocities", velocities);
+    io.to(roomID).emit("position-update", positions);
   }, squirtleRaceUpdateInterval);
-
-  setTimeout(() => {
-    clearInterval(raceInterval);
-  }, 10000);
 };
 
-const generateRandVelocities = (squirtles) => {
-  const minCeiled = Math.ceil(MIN_SPEED);
-  const maxFloored = Math.floor(MAX_SPEED);
-  return squirtles.reduce((arr, squirtle) => {
-    arr[squirtle.id] =
-      Math.floor(Math.random() * (maxFloored - minCeiled + 1)) + minCeiled;
-    return arr;
+const generateRandomStep = (positions) => {
+  const minCeiled = Math.ceil(MIN_STEP);
+  const maxFloored = Math.floor(MAX_STEP);
+
+  return Object.keys(positions).reduce((acc, id) => {
+    acc[id] =
+      positions[id] +
+      Math.floor(Math.random() * (maxFloored - minCeiled + 1)) +
+      minCeiled;
+    return acc;
   }, {});
 };
 
-async function squirtleWon(roomID, io, squirtle) {
+// const generateRandVelocities = (squirtles) => {
+//   const minCeiled = Math.ceil(MIN_SPEED);
+//   const maxFloored = Math.floor(MAX_SPEED);
+//   return squirtles.reduce((acc, squirtle) => {
+//     acc[squirtle.id] =
+//       Math.floor(Math.random() * (maxFloored - minCeiled + 1)) + minCeiled;
+//     return acc;
+//   }, {});
+// };
+
+async function squirtleWon(roomID, io, squirtle, racing) {
+  io.to(roomID).emit("stop-moving");
+
   await Room.findOneAndUpdate(
     { code: roomID },
     {
@@ -140,11 +161,15 @@ async function squirtleWon(roomID, io, squirtle) {
       },
     },
   );
-  const winner = squirtle.name;
-  const trainer = squirtle.trainer;
 
-  io.to(roomID).emit("winner", winner, trainer);
-  updateWinnerAndLosers(trainer, roomID, io);
+  //Use racing boolean to ensure event isn't emitted twice
+  if (racing) {
+    const winner = squirtle.name;
+    const trainer = squirtle.trainer;
+
+    io.to(roomID).emit("winner", winner, trainer);
+    updateWinnerAndLosers(trainer, roomID, io);
+  }
 }
 
 const updateWinnerAndLosers = async (trainer, roomID, io) => {

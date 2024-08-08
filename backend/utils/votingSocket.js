@@ -1,4 +1,3 @@
-const Player = require("../models/player");
 const Room = require("../models/room");
 
 const setVotingData = async (roomID, votingData) => {
@@ -27,7 +26,6 @@ const giveDrink = async (io, roomID, giverName, receiverName) => {
       // Emit the updated voting data to the room
       io.to(roomID).emit("update-voting-data", votingData);
     }
-    console.log("votingData: ", votingData);
     checkAllDrinksGiven(io, roomID, votingData);
   } catch (error) {
     console.error("Error giving drink:", error);
