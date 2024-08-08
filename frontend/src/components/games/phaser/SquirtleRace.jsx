@@ -14,6 +14,7 @@ class RaceMain extends Phaser.Scene {
 
   init(data) {
     this.gameData = data.gameData;
+    console.log(this.gameData);
     this.roomID = data.roomID;
     this.racers = this.gameData.racers;
   }
@@ -106,19 +107,33 @@ class RaceMain extends Phaser.Scene {
       self.squirtles.add(player);
     }
 
+    this.socket.on("walk", () => {
+      this.walk();
+    });
+
     // Update velocities on setVelocities event
-    this.socket.on("setVelocities", (velocities) => {
+    // this.socket.on("setVelocities", (velocities) => {
+    //   if (this.racing === true) {
+    //     this.updateVelocities(velocities);
+    //   }
+    // });
+
+    // Update positions on setVelocities event
+    this.socket.on("position-update", (positions) => {
+      console.log("Racing:", this.racing);
       if (this.racing === true) {
-        this.updateVelocities(velocities);
+        this.updatePositions(positions);
       }
     });
 
-    this.socket.on("winner", (winner, trainer) => {
+    this.socket.on("stop-moving", () => {
+      console.log("Not racing");
       this.racing = false;
-
       // Stop animations and movement
       this.stop();
+    });
 
+    this.socket.on("winner", (winner, trainer) => {
       this.add
         .text(
           this.gameWidth / 2,
@@ -132,7 +147,14 @@ class RaceMain extends Phaser.Scene {
     });
   }
 
+  walk() {
+    this.squirtles.children.iterate((squirtle) => {
+      squirtle.anims.play("walk", true);
+    });
+  }
+
   stop() {
+    console.log("stopping");
     this.squirtles.children.iterate((squirtle) => {
       squirtle.setVelocityX(0);
       squirtle.anims.play("wait", true);
@@ -140,10 +162,17 @@ class RaceMain extends Phaser.Scene {
   }
 
   //Updates all squirtle velocities when event sent by server
-  updateVelocities(velocities) {
+  // updateVelocities(velocities) {
+  //   this.squirtles.children.iterate((squirtle) => {
+  //     squirtle.setVelocityX(velocities[squirtle.id]);
+  //     squirtle.anims.play("walk", true);
+  //   });
+  // }
+
+  updatePositions(positions) {
+    console.log(positions);
     this.squirtles.children.iterate((squirtle) => {
-      squirtle.setVelocityX(velocities[squirtle.id]);
-      squirtle.anims.play("walk", true);
+      squirtle.setX(positions[squirtle.id]);
     });
   }
 
@@ -159,7 +188,7 @@ class RaceMain extends Phaser.Scene {
   checkWonRace(squirtle, roomID) {
     if (squirtle.body.x >= this.gameWidth - 60) {
       const { name, trainer } = squirtle;
-      this.socket.emit("won-race", { name, trainer }, roomID);
+      this.socket.emit("won-race", { name, trainer }, roomID, this.racing);
     }
   }
 }

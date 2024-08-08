@@ -24,7 +24,6 @@ export default function Voting({
   const [isDoneDrinking, setIsDoneDrinking] = useState(false);
 
   useEffect(() => {
-    console.log(votingData);
     //Set the current user's drinks to give
     setDrinksToGive(votingData[username].drinksToGive || 0);
 

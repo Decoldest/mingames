@@ -8,6 +8,7 @@ import mixed from "../assets/mixed-drink.png";
 import cocktail from "../assets/cocktail.png";
 import vodka from "../assets/vodka.png";
 import { FaCirclePlus, FaCircleMinus } from "react-icons/fa6";
+import '@fontsource/noto-mono';
 
 const drinkImages = [beer, wine, soju, mixed, cocktail, vodka];
 

@@ -86,7 +86,6 @@ export default function Race({
           {waitingMessage && <h2>{waitingMessage}</h2>}
         </div>
       ) : (
-        // Rotate on smaller screens
         <div className={"h-screen w-screen"} ref={squirtleRaceRef}>
           <SquirtleRace data={{ gameData, roomID }} />
         </div>
