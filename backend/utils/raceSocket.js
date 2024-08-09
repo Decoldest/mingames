@@ -1,7 +1,7 @@
 const Room = require("../models/room");
 const COUNTDOWN_DURATION = 6000;
 const COUNTDOWN_INTERVAL = 1000;
-const squirtleRaceUpdateInterval = 100;
+const squirtleRaceUpdateInterval = 200;
 // const MAX_SPEED = 70;
 // const MIN_SPEED = 30;
 const INITIAL_X = 150;
@@ -55,7 +55,7 @@ const addRacerSquirtle = async (
       message: "Waiting for other players to name their Squirtle...",
     });
 
-    checkAllSquirtlesNamed(room, roomID, io);
+    checkAllSquirtlesNamed(room, roomID, io, socket);
   } catch (error) {
     console.error("Error adding squirtle: ", error);
     callback({
@@ -66,16 +66,18 @@ const addRacerSquirtle = async (
 };
 
 //Sends an event to client if all players have a squirtle
-const checkAllSquirtlesNamed = async (room, roomID, io) => {
+const checkAllSquirtlesNamed = async (room, roomID, io, socket) => {
   if (room.players.length === room.state.gameData.racers.length) {
     io.to(roomID).emit("game-data", room.state.gameData);
+    console.log("Emitted game data");
     io.to(roomID).emit("squirtle-squad-in");
-    startCountDown(room, roomID, io);
+    console.log("Emitted SSI");
+    startCountDown(room, roomID, io, socket);
   }
 };
 
 //Emit a countdown to the client
-const startCountDown = async (room, roomID, io) => {
+const startCountDown = async (room, roomID, io, socket) => {
   let remainingTime = COUNTDOWN_DURATION;
 
   const intervalID = setInterval(async () => {
@@ -84,7 +86,9 @@ const startCountDown = async (room, roomID, io) => {
     if (remainingTime <= 0) {
       clearInterval(intervalID);
       io.to(roomID).emit("countdown", "Go!");
-      startSquirtleRace(room.state.gameData.racers, roomID, room, io);
+      console.log("Emitted go");
+
+      startSquirtleRace(room.state.gameData.racers, roomID, room, io, socket);
     } else {
       let timerMessage =
         remainingTime > COUNTDOWN_DURATION - 3000
@@ -92,16 +96,18 @@ const startCountDown = async (room, roomID, io) => {
           : Math.ceil(remainingTime / 1000);
 
       io.to(roomID).emit("countdown", timerMessage);
+      console.log("Emitted countdown");
     }
   }, COUNTDOWN_INTERVAL);
 };
 
 //Start race by emmiting starting velocities
-const startSquirtleRace = async (racers, roomID, room, io) => {
+const startSquirtleRace = async (racers, roomID, room, io, socket) => {
   //Immediately send velocities
   // let velocities = generateRandVelocities(racers);
   // io.to(roomID).emit("setVelocities", velocities);
   io.to(roomID).emit("walk");
+  console.log("Emitted walk");
 
   let positions = racers.reduce((acc, racer) => {
     acc[racer.id] = racer.x;
@@ -111,6 +117,16 @@ const startSquirtleRace = async (racers, roomID, room, io) => {
   //Save isRacing in state to check if updates should be sent
   room.state.gameData.isRacing = true;
   await room.save();
+
+  socket.on("won-race", async (squirtle, roomID, racing) => {
+    //Start handling winner
+    squirtleWon(roomID, io, squirtle, racing);
+
+    console.log("stopping broski!");
+    room.state.gameData.isRacing = false;
+    await room.save();
+    clearInterval(raceInterval);
+  });
 
   //Update velocities at set intervals
   const raceInterval = setInterval(() => {
@@ -140,27 +156,19 @@ const generateRandomStep = (positions) => {
   }, {});
 };
 
-// const generateRandVelocities = (squirtles) => {
-//   const minCeiled = Math.ceil(MIN_SPEED);
-//   const maxFloored = Math.floor(MAX_SPEED);
-//   return squirtles.reduce((acc, squirtle) => {
-//     acc[squirtle.id] =
-//       Math.floor(Math.random() * (maxFloored - minCeiled + 1)) + minCeiled;
-//     return acc;
-//   }, {});
-// };
+/* const generateRandVelocities = (squirtles) => {
+  const minCeiled = Math.ceil(MIN_SPEED);
+  const maxFloored = Math.floor(MAX_SPEED);
+  return squirtles.reduce((acc, squirtle) => {
+    acc[squirtle.id] =
+      Math.floor(Math.random() * (maxFloored - minCeiled + 1)) + minCeiled;
+    return acc;
+  }, {});
+}; */
 
 async function squirtleWon(roomID, io, squirtle, racing) {
   io.to(roomID).emit("stop-moving");
-
-  await Room.findOneAndUpdate(
-    { code: roomID },
-    {
-      $set: {
-        "state.gameData.isRacing": false,
-      },
-    },
-  );
+  console.log("Emitted stop-moving");
 
   //Use racing boolean to ensure event isn't emitted twice
   if (racing) {
@@ -168,8 +176,16 @@ async function squirtleWon(roomID, io, squirtle, racing) {
     const trainer = squirtle.trainer;
 
     io.to(roomID).emit("winner", winner, trainer);
+    initializeDestroyGame(roomID, io);
+
     updateWinnerAndLosers(trainer, roomID, io);
   }
+}
+
+function initializeDestroyGame(roomID, io) {
+  setTimeout(function () {
+    io.to(roomID).emit("winner");
+  }, 2500);
 }
 
 const updateWinnerAndLosers = async (trainer, roomID, io) => {
@@ -196,7 +212,7 @@ const updateWinnerAndLosers = async (trainer, roomID, io) => {
     }
   });
 
-  // Wait 2 seconds before starting voting process
+  // Wait 3 seconds before starting voting process
   setTimeout(function () {
     handleRaceWinnerVoting(io, roomID, drinkData);
   }, 3000);
