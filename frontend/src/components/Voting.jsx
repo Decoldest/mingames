@@ -84,6 +84,7 @@ export default function Voting({
           >
             Done Drinking
           </button>
+          {isDoneDrinking && <h3>Waiting for other players...</h3>}
         </div>
       ) : (
         <>

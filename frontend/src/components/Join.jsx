@@ -71,7 +71,7 @@ export default function Join({
             usernameHandler={usernameHandler}
             errorHandler={errorHandler}
           />
-          <button onClick={handleJoinRoom} className="w-full main-button">
+          <button onClick={handleJoinRoom} className="w-full main-button join-button">
             Join Room
           </button>
         </div>
@@ -132,7 +132,7 @@ export default function Join({
                 placeholder="Enter Room Code"
                 className="flex-grow room-code"
               />
-              <button onClick={handleJoinRoom} className="w-full main-button">
+              <button onClick={handleJoinRoom} className="w-full main-button join-button">
                 Join Room
               </button>
             </div>

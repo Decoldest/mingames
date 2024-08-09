@@ -25,6 +25,7 @@ export default function Race({
   const squirtleRaceRef = useRef(null);
 
   useEffect(() => {
+    console.log(gameData);
     const handleAllSquirtlesIn = () => {
       setIsNamed(true);
     };
