@@ -5,6 +5,8 @@
 $main-background-colour: #2B59C3;
 $main-button-shadow:#253C78;
 $main-text-colour: rgb(238, 238, 238);
+$players-container-colour:#2851b1;
+
 
 * {
   margin: 0;
@@ -145,4 +147,37 @@ canvas {
 .disclaimer {
   margin: none;
   font-size: 0.8rem;
+}
+
+.players-container {
+  height: 225px;
+  overflow-y: auto; 
+  background-color: $players-container-colour;
+  border-radius: 8px;
+  padding: 10px;
+
+  @media (max-width: 950px) {
+    height: 150px;
+  }
+
+  @media (max-width: 1200px) {
+    height: 175px;
+  }
+  
+  .username-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    width: 100%;
+
+    .username{
+      display: flex;
+      align-items: center;
+      height: 30px;
+      gap: 2px;
+      img {
+        height: 20px;
+      }
+    }
+  }
 }

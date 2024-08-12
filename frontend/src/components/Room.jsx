@@ -12,6 +12,7 @@ export default function Room() {
   const location = useLocation();
   const { username, setUsername } = useContext(UserContext);
   const navigate = useNavigate();
+  const [players, setPlayers] = useState([]);
 
   const [isPartyLeader, setIsPartyLeader] = useState(
     location.state?.isPartyLeader || false,
@@ -105,16 +106,26 @@ export default function Room() {
     setUsername(username);
   };
 
+  const playersHandler = (players) => {
+    setPlayers(players);
+  };
+
   return (
     <main className="flex flex-col">
       <div className="min-h-screen flex items-start justify-center pt-5 sm:pt-20">
         {waiting ? (
-          <WaitingRoom username={username} isPartyLeader={isPartyLeader} />
+          <WaitingRoom
+            isPartyLeader={isPartyLeader}
+            players={players}
+            playersHandler={playersHandler}
+          />
         ) : playing ? (
           <GameMain
             isPartyLeader={isPartyLeader}
             state={state}
             setState={setState}
+            players={players}
+            playersHandler={playersHandler}
           />
         ) : (
           <Join

@@ -64,7 +64,6 @@ const handlePlayerJoiningLate = async (room, username, socketID) => {
   const { selectedGame, gameData, votingData, isWagering } = room.state;
   let addedGameData;
   let addedVotingData = null;
-  
 
   // Update room game data
   if (selectedGame === "Hot Potato") {

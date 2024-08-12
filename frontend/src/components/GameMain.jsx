@@ -8,17 +8,26 @@ import Voting from "./Voting";
 import HotPotato from "./games/HotPotato";
 import { socket } from "../socket";
 import ButtonPress from "./games/ButtonPress";
-import '@fontsource/press-start-2p';
-import '@fontsource/share-tech-mono';
+import PlayerList from "./PlayerList";
+import "@fontsource/press-start-2p";
+import "@fontsource/share-tech-mono";
 import "./GameMain.scss";
 
 GameMain.propTypes = {
   isPartyLeader: PropTypes.bool,
   state: PropTypes.object,
   setState: PropTypes.func,
+  players: PropTypes.array,
+  playersHandler: PropTypes.func,
 };
 
-export default function GameMain({ isPartyLeader, state, setState }) {
+export default function GameMain({
+  isPartyLeader,
+  state,
+  setState,
+  players,
+  playersHandler,
+}) {
   const { roomID } = useParams();
 
   const { isWagering, selectedGame, gameData, votingData, waitingMessage } =
@@ -77,7 +86,6 @@ export default function GameMain({ isPartyLeader, state, setState }) {
     };
 
     const handleLatePlayer = (addedGameData, addedVotingData) => {
-
       setState((prevState) => {
         // Handle null or undefined addedVotingData
         const votingDataUpdate = addedVotingData
@@ -105,6 +113,15 @@ export default function GameMain({ isPartyLeader, state, setState }) {
       });
     };
 
+    const handleJoinedRoom = (username, playerList) => {
+      console.log(playerList);
+      playersHandler(playerList);
+    };
+
+    const handleLeftRoom = (username, playerList) => {
+      playersHandler(playerList);
+    };
+
     socket.on("game-data", handleGameData);
     socket.on("start-wagering", handleStartWagers);
     socket.on("set-game-selection", handleRoomGameSelected);
@@ -113,6 +130,8 @@ export default function GameMain({ isPartyLeader, state, setState }) {
     socket.on("update-game", handleContinueGame);
     socket.on("end-game", handleEndGame);
     socket.on("late-player-data", handleLatePlayer);
+    socket.on("joined-room", handleJoinedRoom);
+    socket.on("left-room", handleLeftRoom);
 
     return () => {
       socket.off("game-data", handleGameData);
@@ -123,8 +142,10 @@ export default function GameMain({ isPartyLeader, state, setState }) {
       socket.off("update-game", handleContinueGame);
       socket.off("end-game", handleEndGame);
       socket.off("late-player-data", handleLatePlayer);
+      socket.off("joined-room", handleJoinedRoom);
+      socket.off("left-room", handleLeftRoom);
     };
-  }, [setState, gameData]);
+  }, [setState, gameData, playersHandler]);
 
   const setWageringPhase = () => {
     if (isPartyLeader) {
@@ -215,6 +236,7 @@ export default function GameMain({ isPartyLeader, state, setState }) {
               *Party leader will select the game
             </h2>
           )}
+          <PlayerList players={players} />
         </div>
       )}
     </section>

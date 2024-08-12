@@ -203,7 +203,7 @@ io.on("connection", (socket) => {
         );
 
         setTimeout(() => {
-          io.to(roomID).emit("joined-room", username, [player]);
+          io.to(roomID).emit("joined-room", username, updatedRoom.players);
         }, 250);
 
         console.log(`Player ${username} joined room ${roomID}`);

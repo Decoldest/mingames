@@ -4,38 +4,38 @@ import { useParams } from "react-router-dom";
 import UserContext from "./UserContext";
 import { socket } from "../socket";
 import { useNavigate } from "react-router-dom";
-import crown from "../assets/crown.png";
 import "./WaitingRoom.scss";
+import PlayerList from "./PlayerList";
 
 WaitingRoom.propTypes = {
   isPartyLeader: PropTypes.bool,
+  players: PropTypes.array,
+  playersHandler: PropTypes.func,
 };
 
-export default function WaitingRoom({ isPartyLeader }) {
+export default function WaitingRoom({ isPartyLeader, players, playersHandler }) {
   const { roomID } = useParams();
   const { username } = useContext(UserContext);
   const [messageInput, setMessageInput] = useState("");
   const [messages, setMessages] = useState([]);
-  const [players, setPlayers] = useState([]);
   const [copySuccess, setCopySuccess] = useState("");
   const messageContainerRef = useRef(null);
   const navigate = useNavigate();
-  const link = `${window.location.hostname.replace(/^www\./, '')}/${roomID}`;
+  const link = `${window.location.hostname.replace(/^www\./, "")}/${roomID}`;
 
   useEffect(() => {
-
     const addMessage = (message) => {
       setMessages((prevMessages) => [...prevMessages, message]);
     };
 
     const handleJoinedRoom = (username, playerList) => {
       addMessage(`${username} joined`);
-      setPlayers(playerList);
+      playersHandler(playerList);
     };
 
     const handleLeftRoom = (username, playerList) => {
       addMessage(`${username} left`);
-      setPlayers(playerList);
+      playersHandler(playerList);
     };
 
     const handleReceiveMessage = (message, username) => {
@@ -57,7 +57,7 @@ export default function WaitingRoom({ isPartyLeader }) {
       socket.off("receive-message", handleReceiveMessage);
       socket.off("return-main", returnToHome);
     };
-  }, [navigate, players]);
+  }, [navigate, playersHandler]);
 
   const sendMessage = () => {
     if (messageInput.trim() !== "") {
@@ -102,21 +102,7 @@ export default function WaitingRoom({ isPartyLeader }) {
         ) : (
           <h4>Party leader will start the game</h4>
         )}
-        <div className="players-container mt-10">
-          <h2>Players</h2>
-          <div className="username-grid">
-            {players.map((player) => (
-              <div key={player._id} className="username">
-                {player.isPartyLeader && (
-                  <div>
-                    <img src={crown} alt="Crown Icon" />
-                  </div>
-                )}
-                <p>{player.username}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        <PlayerList players={players}/>
       </div>
       <div className="input-container">
         <div className="message-container" ref={messageContainerRef}>

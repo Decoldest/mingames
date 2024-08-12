@@ -2,8 +2,6 @@ $wait-backround-colour: #FFEEBD;
 $wait-input-border: #DE7339;
 $send-button-colour: rgb(124, 182, 86);
 $input-container-colour: rgb(249, 245, 245);
-$players-container-colour:#2851b1;
-
 
 .wait {
   flex-direction: column;
@@ -59,39 +57,6 @@ $players-container-colour:#2851b1;
       }
       @media (max-width: 400px) {
         font-size: 0.8rem;
-      }
-    }
-  
-    .players-container {
-      height: 225px;
-      overflow-y: auto; 
-      background-color: $players-container-colour;
-      border-radius: 8px;
-      padding: 10px;
-  
-      @media (max-width: 950px) {
-        height: 150px;
-      }
-
-      @media (max-width: 1200px) {
-        height: 175px;
-      }
-      
-      .username-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 10px;
-        width: 100%;
-  
-        .username{
-          display: flex;
-          align-items: center;
-          height: 30px;
-          gap: 2px;
-          img {
-            height: 20px;
-          }
-        }
       }
     }
   }
