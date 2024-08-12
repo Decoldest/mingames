@@ -124,7 +124,7 @@ io.on("connection", (socket) => {
       //Send joined message
       setTimeout(() => {
         io.to(roomID).emit("joined-room", username, [player]);
-      }, 0);
+      }, 250);
     } catch (err) {
       console.error("Error creating room: ", err);
     }
@@ -204,7 +204,7 @@ io.on("connection", (socket) => {
 
         setTimeout(() => {
           io.to(roomID).emit("joined-room", username, [player]);
-        }, 0);
+        }, 250);
 
         console.log(`Player ${username} joined room ${roomID}`);
       } else {
