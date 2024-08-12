@@ -73,12 +73,12 @@ class RaceMain extends Phaser.Scene {
     });
 
     // Draw timer and start countdown
-    // const timerLabel = this.add.text(this.gameWidth / 2, 300, "", {
-    //   fontSize: 40,
-    // });
-    // timerLabel.setOrigin(0.5, 0.5);
+    const timerLabel = this.add.text(this.gameWidth / 2, 300, "", {
+      fontSize: 40,
+    });
+    timerLabel.setOrigin(0.5, 0.5);
 
-    // this.countdown = new Countdown(this, timerLabel);
+    this.countdown = new Countdown(this, timerLabel);
 
     //Helper function to add a squirtle sprite into the game
     function addPlayer(self, squirtleInfo) {
@@ -158,6 +158,18 @@ class RaceMain extends Phaser.Scene {
         this.squirtles.destroy();
       }
       console.log("destroyed squirtles", this.squirtles.children);
+
+      if (this.timerLabel) {
+        this.timerLabel.destroy();
+        this.timerLabel = null;
+      }
+    
+      // Clean up the countdown instance if it has a destroy method
+      if (this.countdown) {
+        this.countdown.destroy();
+        this.countdown = null;
+      }
+
       this.tweens.killAll();
       this.registry.destroy();
       this.events.off();
@@ -181,10 +193,12 @@ class RaceMain extends Phaser.Scene {
   }
 
   stop(squirtles) {
-    squirtles.children.iterate((squirtle) => {
-      squirtle.setVelocityX(0);
-      squirtle.anims.play("wait", true);
-    });
+    if (squirtles && squirtles.children) {
+      squirtles.children.iterate((squirtle) => {
+        squirtle.setVelocityX(0);
+        squirtle.anims.play("wait", true);
+      });
+    }
   }
 
   /*Updates all squirtle velocities when event sent by server
@@ -259,6 +273,7 @@ export default function SquirtleRace({ data }) {
         },
       },
     };
+
     const game = new Phaser.Game(config);
     game.scene.add("RaceMain", RaceMain, true, data);
     gameRef.current = game;

@@ -17,23 +17,34 @@ export default class Countdown {
     this.label = label;
 
     // Listen for countdown updates from the server
-    socket.on("countdown", (message) => {
-      this.updateCountdown(message);
-    });
+    this.countdownListener = (message) => {
+      this.updateCountdown(this, message);
+    };
+    socket.on("countdown", this.countdownListener);
   }
 
   /**
    *
    * @param {string | number} message
    */
-  updateCountdown(message) {
-    this.label.setText(message.toString());
+  updateCountdown(self, message) {
+    self.label.setText(message.toString());
 
     if (message === "Go!") {
       // Hide the label after displaying "Go!" for 500 ms
-      this.scene.time.delayedCall(500, () => {
-        this.label.setVisible(false);
+      self.scene.time.delayedCall(500, () => {
+        self.label.setVisible(false);
       });
+    }
+  }
+
+  destroy() {
+    // Remove the countdown listener to prevent memory leaks or unwanted updates
+    socket.off("countdown", this.countdownListener);
+
+    if (this.label) {
+      this.label.destroy();
+      this.label = null;
     }
   }
 }
