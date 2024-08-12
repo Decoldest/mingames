@@ -1,12 +1,12 @@
 const Room = require("../models/room");
 const COUNTDOWN_DURATION = 6000;
 const COUNTDOWN_INTERVAL = 1000;
-const squirtleRaceUpdateInterval = 200;
+const squirtleRaceUpdateInterval = 333;
 // const MAX_SPEED = 70;
 // const MIN_SPEED = 30;
 const INITIAL_X = 150;
 const MIN_STEP = 1;
-const MAX_STEP = 5;
+const MAX_STEP = 4;
 
 const { handleRaceWinnerVoting } = require("./votingSocket");
 
@@ -69,9 +69,7 @@ const addRacerSquirtle = async (
 const checkAllSquirtlesNamed = async (room, roomID, io, socket) => {
   if (room.players.length === room.state.gameData.racers.length) {
     io.to(roomID).emit("game-data", room.state.gameData);
-    console.log("Emitted game data");
     io.to(roomID).emit("squirtle-squad-in");
-    console.log("Emitted SSI");
     startCountDown(room, roomID, io, socket);
   }
 };
@@ -86,7 +84,6 @@ const startCountDown = async (room, roomID, io, socket) => {
     if (remainingTime <= 0) {
       clearInterval(intervalID);
       io.to(roomID).emit("countdown", "Go!");
-      console.log("Emitted go");
 
       startSquirtleRace(room.state.gameData.racers, roomID, room, io, socket);
     } else {
@@ -96,7 +93,6 @@ const startCountDown = async (room, roomID, io, socket) => {
           : Math.ceil(remainingTime / 1000);
 
       io.to(roomID).emit("countdown", timerMessage);
-      console.log("Emitted countdown");
     }
   }, COUNTDOWN_INTERVAL);
 };
@@ -107,7 +103,6 @@ const startSquirtleRace = async (racers, roomID, room, io, socket) => {
   // let velocities = generateRandVelocities(racers);
   // io.to(roomID).emit("setVelocities", velocities);
   io.to(roomID).emit("walk");
-  console.log("Emitted walk");
 
   let positions = racers.reduce((acc, racer) => {
     acc[racer.id] = racer.x;
@@ -156,16 +151,6 @@ const generateRandomStep = (positions) => {
   }, {});
 };
 
-/* const generateRandVelocities = (squirtles) => {
-  const minCeiled = Math.ceil(MIN_SPEED);
-  const maxFloored = Math.floor(MAX_SPEED);
-  return squirtles.reduce((acc, squirtle) => {
-    acc[squirtle.id] =
-      Math.floor(Math.random() * (maxFloored - minCeiled + 1)) + minCeiled;
-    return acc;
-  }, {});
-}; */
-
 async function squirtleWon(roomID, io, squirtle, racing) {
   io.to(roomID).emit("stop-moving");
   console.log("Emitted stop-moving");
@@ -184,8 +169,8 @@ async function squirtleWon(roomID, io, squirtle, racing) {
 
 function initializeDestroyGame(roomID, io) {
   setTimeout(function () {
-    io.to(roomID).emit("winner");
-  }, 2500);
+    io.to(roomID).emit("destroy-all");
+  }, 3000);
 }
 
 const updateWinnerAndLosers = async (trainer, roomID, io) => {
@@ -220,5 +205,4 @@ const updateWinnerAndLosers = async (trainer, roomID, io) => {
 
 module.exports = {
   addRacerSquirtle,
-  squirtleWon,
 };

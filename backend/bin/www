@@ -68,7 +68,7 @@ const {
 
 const { giveDrink } = require("../utils/votingSocket");
 
-const { addRacerSquirtle, squirtleWon } = require("../utils/raceSocket");
+const { addRacerSquirtle } = require("../utils/raceSocket");
 
 const {
   sendPlayers,
@@ -122,9 +122,9 @@ io.on("connection", (socket) => {
       callback({ success: true, roomID });
 
       //Send joined message
-      process.nextTick(() => {
+      setTimeout(() => {
         io.to(roomID).emit("joined-room", username, [player]);
-      });
+      }, 0);
     } catch (err) {
       console.error("Error creating room: ", err);
     }
@@ -140,7 +140,7 @@ io.on("connection", (socket) => {
         return;
       }
 
-      if (room.state.selectedGame && room.state.selectedGame === "Race") {
+      if (room.state.selectedGame && room.state.selectedGame === "Race" && room.state.gameData) {
         socket.emit(
           "error",
           "Room is currently in a racing game. Please join after the race is finished",
@@ -202,9 +202,9 @@ io.on("connection", (socket) => {
           updatedData.addedVotingData,
         );
 
-        process.nextTick(() => {
-          io.to(roomID).emit("joined-room", username, updatedRoom.players);
-        });
+        setTimeout(() => {
+          io.to(roomID).emit("joined-room", username, [player]);
+        }, 0);
 
         console.log(`Player ${username} joined room ${roomID}`);
       } else {
