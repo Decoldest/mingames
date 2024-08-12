@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 .env
-socket.js
+src/socket.js

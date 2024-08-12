@@ -20,7 +20,7 @@ export default function WaitingRoom({ isPartyLeader }) {
   const [copySuccess, setCopySuccess] = useState("");
   const messageContainerRef = useRef(null);
   const navigate = useNavigate();
-  const link = `${window.location.origin}/${roomID}`;
+  const link = `${window.location.hostname}/${roomID}`;
 
   useEffect(() => {
     const addMessage = (message) => {
