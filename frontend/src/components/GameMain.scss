@@ -4,7 +4,7 @@ $game-background-colour:#253C78;
 .game-buttons-container {
   margin: 2rem 4rem;
 
-  @media (min-width: 800px) {
+  @media (max-width: 800px) {
     margin: 5% 10%;
   }
 
