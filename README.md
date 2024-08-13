@@ -9,8 +9,7 @@ Play now at [boozebash.ca](boozebash.ca)
 
 BoozeBash is a fun, interactive web application featuring various minigames for social gatherings. This project uses React for the frontend, Node.js with Socket.IO for the backend, and is deployed using Vercel and Fly.io.
 
-![screenshot](https://github.com/user-attachments/assets/e5699999-b7c7-4f02-bae2-79d4e2b0a0b4)
-
+![screenshot](https://github.com/user-attachments/assets/4f0701c3-327e-46a0-a04a-516430ce10b2)
 
 - [BoozeBash](#boozebash)
   * [A group party game for thirsty people](#a-group-party-game-for-thirsty-people)
@@ -29,6 +28,9 @@ BoozeBash is a fun, interactive web application featuring various minigames for 
 - Squirtle Race: Bet on your Squirtle and see who comes out on top in this racing game.
 - Hot Potato: Simply a classic game of Hot Potato where you pass the potato until the timer runs out.
 - Button Press: Exercise your fingers by seeing who can push the button the most before time is up.
+
+![hot-potato](https://github.com/user-attachments/assets/2dcc24f5-cb78-492c-95eb-40dfcc5dfcce)
+*Hot Potato Game*
 
 ## Getting Started
 To start playing, simply visit BoozeBash.ca on your preferred web browser. No downloads or installations are required.
