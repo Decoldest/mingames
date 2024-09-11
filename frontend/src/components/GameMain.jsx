@@ -114,7 +114,6 @@ export default function GameMain({
     };
 
     const handleJoinedRoom = (username, playerList) => {
-      console.log(playerList);
       playersHandler(playerList);
     };
 

@@ -22,6 +22,7 @@ export default function Voting({
   const [votingResults, setVotingResults] = useState(0);
   const { username } = useContext(UserContext);
   const [isDoneDrinking, setIsDoneDrinking] = useState(false);
+  const [triviaAnswer, setTriviaAnswer] = useState(null);
 
   useEffect(() => {
     //Set the current user's drinks to give
@@ -40,14 +41,20 @@ export default function Voting({
       setVotingResults(votingData[username]?.myDrinks);
     };
 
+    const addTriviaAnswer = (answer) => {
+      setTriviaAnswer(answer);
+    };
+
     socket.on("warning", handleWarning);
     socket.on("update-voting-data", updateVotingData);
     socket.on("all-drinks-given", allocateDrinks);
+    socket.on("trivia-answer", addTriviaAnswer);
 
     return () => {
       socket.off("warning", handleWarning);
       socket.off("update-voting-data", updateVotingData);
       socket.off("all-drinks-given", allocateDrinks);
+      socket.off("trivia-answer", addTriviaAnswer);
     };
   }, [warning, votingData, username, votingResults, setVotingData]);
 
@@ -58,11 +65,14 @@ export default function Voting({
 
   return (
     <div className="voting-container">
+      {triviaAnswer && <h2 className="self-center">Correct Answer: {triviaAnswer}</h2>}
       <h2 className="self-center">
         {votingData[username] && votingData[username].message}
       </h2>
       {drinksToGive > 0 && (
-        <h1 className="self-center my-5">Choose who you want to give drinks to!</h1>
+        <h1 className="self-center my-5">
+          Choose who you want to give drinks to!
+        </h1>
       )}
       {votingData.done ? (
         <div>
@@ -89,42 +99,44 @@ export default function Voting({
       ) : (
         <>
           <div className="voting-grid">
-            {Object.entries(votingData).map(([name, drinks], i) => (
-              typeof drinks === 'object' && (
-                <div key={i} className="voting-player">
-                  <div>
-                    <h2 id="name">{name}</h2>
-                    <h3>Drinks: {drinks.myDrinks}</h3>
-                    <div className="holding-drink-container">
-                      {Array.from({ length: drinks.myDrinks }, (_, i) => (
-                        <img
-                          key={i}
-                          src={holdingDrinkImage}
-                          alt="Holding Drink Icon"
-                          id="holding-drink"
-                        />
-                      ))}
+            {Object.entries(votingData).map(
+              ([name, drinks], i) =>
+                typeof drinks === "object" && (
+                  <div key={i} className="voting-player">
+                    <div>
+                      <h2 id="name">{name}</h2>
+                      <h3>Drinks: {drinks.myDrinks}</h3>
+                      <div className="holding-drink-container">
+                        {Array.from({ length: drinks.myDrinks }, (_, i) => (
+                          <img
+                            key={i}
+                            src={holdingDrinkImage}
+                            alt="Holding Drink Icon"
+                            id="holding-drink"
+                          />
+                        ))}
+                      </div>
                     </div>
+                    {name !== username && drinksToGive > 0 && (
+                      <div className="button-holder">
+                        <button
+                          onClick={() => {
+                            addDrink(name);
+                          }}
+                          className="game-button"
+                        >
+                          Give Drink
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  {name !== username && drinksToGive > 0 && (
-                    <div className="button-holder">
-                      <button
-                        onClick={() => {
-                          addDrink(name);
-                        }}
-                        className="game-button"
-                      >
-                        Give Drink
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )
-            ))}
+                ),
+            )}
             {warning && <div className="warning">{warning}</div>}
           </div>
           <h2 className="self-center">
-            You Have {drinksToGive} {drinksToGive == 1 ? `Drink` : `Drinks`} To Give
+            You Have {drinksToGive} {drinksToGive == 1 ? `Drink` : `Drinks`} To
+            Give
           </h2>
         </>
       )}
