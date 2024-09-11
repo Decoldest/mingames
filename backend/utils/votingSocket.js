@@ -38,7 +38,6 @@ const checkAllDrinksGiven = async (io, roomID, votingData) => {
     .filter(([_name, value]) => typeof value === "object")
     .every(([_name, player]) => player.drinksToGive <= 0);
 
-  
   if (allDrinksGiven) {
     //Add done:true property
     votingData = {
@@ -85,7 +84,7 @@ const handleStartTriviaVoting = async (
     io.to(roomID).emit("start-voting", votingData);
     io.to(roomID).emit("all-drinks-given", votingData);
   } else {
-    // Change state to voting, !done means players willl give out drinks
+    // Change state to voting, !done means players will give out drinks
     votingData = {
       ...votingData,
       done: false,
@@ -95,6 +94,31 @@ const handleStartTriviaVoting = async (
     io.to(roomID).emit("start-voting", votingData);
     setVotingData(roomID, votingData);
   }
+
+  sendCorrectAnswer(io, roomID);
+};
+
+const sendCorrectAnswer = async (io, roomID) => {
+  // Get correct trivia answer and round
+  const {
+    state: {
+      gameData: {
+        triviaData: { results },
+        round,
+      },
+    },
+  } = await Room.findOne(
+    { code: roomID },
+    {
+      "state.gameData.triviaData.results": 1,
+      "state.gameData.round": 1,
+      _id: 0,
+    },
+  );
+
+  // Emit the correct answer for the current round
+  const correctAnswer = results[round].correct_answer;
+  io.to(roomID).emit("trivia-answer", correctAnswer);
 };
 
 const handleRaceWinnerVoting = (io, roomID, votingData) => {

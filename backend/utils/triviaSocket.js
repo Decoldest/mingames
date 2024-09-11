@@ -126,6 +126,8 @@ const triviaAnswered = async (socket, io, roomID, correctAnswer, choice) => {
   }
 };
 
+
+
 module.exports = {
   sendTriviaQuestions,
   handleTriviaAnswers,
