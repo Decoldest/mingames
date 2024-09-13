@@ -17,14 +17,22 @@ Wager.propTypes = {
   isPartyLeader: PropTypes.bool,
 };
 
+const DRINK_LIMIT = 6;
+
 export default function Wager({ roomID }) {
   const [wager, setWager] = useState(0);
   const [warning, setWarning] = useState(null);
   const [doneWagering, setDoneWagering] = useState(false);
   const [selectedDrinks, setSelectedDrinks] = useState([]);
+  const [drinkLimitMessage, setDrinkLimitMessage] = useState("");
 
   const handleIncrement = () => {
-    setWager((prevWager) => prevWager + 1);
+    if (wager < DRINK_LIMIT) {
+      setWager((prevWager) => prevWager + 1);
+      setDrinkLimitMessage("");
+    } else {
+      setDrinkLimitMessage(`Slow down there buddy.`);
+    }
   };
 
   const handleDecrement = () => {
@@ -90,7 +98,7 @@ export default function Wager({ roomID }) {
                 </button>
               </div>
             </div>
-
+            {drinkLimitMessage && <div className="warning">{drinkLimitMessage}</div>}
             {warning && <div className="warning">{warning}</div>}
           </div>
           <div className="drinks-grid">

@@ -44,7 +44,6 @@ export default function Join({
       } else {
         setView("landing");
       }
-      console.log(window.history);
     };
     window.addEventListener("popstate", handlePopState);
 
