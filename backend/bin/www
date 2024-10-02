@@ -83,6 +83,8 @@ const {
   startButtonTimer,
 } = require("../utils/buttonSocket");
 
+const { handleError, createPlayer, createRoom } = require("../utils/helpers");
+
 /**
  * Socket connection
  */
@@ -94,28 +96,10 @@ io.on("connection", (socket) => {
   socket.on("create-room", async (username, callback) => {
     try {
       const roomID = generateRoomID();
-      const player = new Player({
-        username: username,
-        socketID: socket.id,
-        isPartyLeader: true,
-        wonBet: null,
-      });
-      await player.save();
 
-      const room = new Room({
-        code: roomID,
-        players: [player._id],
-        isJoin: true,
-        wagers: {},
-        votes: {},
-        state: {
-          waiting: true,
-          playing: false,
-          isWagering: false,
-          selectedGame: null,
-        },
-      });
-      await room.save();
+      const player = await createPlayer(username, socket.id, true);
+
+      await createRoom(player._id, roomID);
 
       //Join socket room and send message
       socket.join(roomID);
@@ -125,8 +109,8 @@ io.on("connection", (socket) => {
       setTimeout(() => {
         io.to(roomID).emit("joined-room", username, [player]);
       }, 250);
-    } catch (err) {
-      console.error("Error creating room: ", err);
+    } catch (error) {
+      return handleError(socket, "Error creating room", error);
     }
   });
 
@@ -135,17 +119,13 @@ io.on("connection", (socket) => {
     try {
       const room = await Room.findOne({ code: roomID });
 
-      if (!room) {
-        socket.emit("error", "Room code doesn't exist");
-        return;
-      }
+      if (!room) return handleError(socket, "Room code doesn't exist");
 
-      if (room.state.selectedGame && room.state.selectedGame === "Race" && room.state.gameData) {
-        socket.emit(
-          "error",
+      if (room.state.selectedGame === "Race" && room.state.gameData) {
+        return handleError(
+          socket,
           "Room is currently in a racing game. Please join after the race is finished",
         );
-        return;
       }
       // Room is available to join
       if (room) {
@@ -156,17 +136,11 @@ io.on("connection", (socket) => {
         });
 
         if (existingPlayer) {
-          socket.emit("error", "Username already taken in this room");
-          return;
+          return handleError(socket, "Username already taken in this room");
         }
 
         //Create player and add to room
-        const player = new Player({
-          username,
-          socketID: socket.id,
-          wonBet: null,
-        });
-        await player.save();
+        const player = await createPlayer(username, socket.id);
 
         const updatedRoom = await Room.findByIdAndUpdate(
           room._id,
@@ -180,8 +154,7 @@ io.on("connection", (socket) => {
         });
 
         if (!updatedRoom) {
-          socket.emit("error", "Room not found");
-          return;
+          return handleError(socket, "Room not found");
         }
 
         // Join socket room
@@ -208,11 +181,14 @@ io.on("connection", (socket) => {
 
         console.log(`Player ${username} joined room ${roomID}`);
       } else {
-        socket.emit("error", "Room not found");
+        return handleError(socket, "Room not found");
       }
     } catch (error) {
-      console.error("Error joining room: ", error);
-      socket.emit("error", "An error occurred while trying to join the room");
+      return handleError(
+        socket,
+        "An error occurred while trying to join the room",
+        error,
+      );
     }
   });
 
@@ -229,7 +205,7 @@ io.on("connection", (socket) => {
         { $set: { "state.waiting": false, "state.playing": true } },
       );
     } catch (error) {
-      console.error("Error handling game start: ", error);
+      return handleError(socket, "Error handling game start", error);
     }
     console.log(`Room ${roomID} started playing`);
     io.to(roomID).emit("start-game");
@@ -244,7 +220,7 @@ io.on("connection", (socket) => {
         { $set: { "state.isWagering": true } },
       );
     } catch (error) {
-      console.error("Error handling wagering start: ", error);
+      return handleError(socket, "Error wagering game start", error);
     }
     io.to(roomID).emit("start-wagering");
   });
@@ -271,7 +247,7 @@ io.on("connection", (socket) => {
       //Fetch data or set up data for the game
       prepareGameData(io, roomID, room, game);
     } catch (error) {
-      console.error("Error handling game selection: ", error);
+      return handleError(socket, "Error handling game selection", error);
     }
   });
 
@@ -314,7 +290,7 @@ io.on("connection", (socket) => {
         handleTimer(io, roomID, room.state.selectedGame);
       }
     } catch (error) {
-      console.error("Error handling wager: ", error);
+      return handleError(socket, "Error handling wager", error);
     }
   });
 
@@ -409,7 +385,7 @@ const handlePlayerLeaving = async (io, socket) => {
       );
     }
   } catch (error) {
-    console.error("Error handling disconnect: ", error);
+    return handleError(socket, "Error handling disconnect", error);
   }
 };
 
